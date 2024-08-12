@@ -2,7 +2,7 @@
 name = "spark-rust-sdk-examples"
 version = "0.1.0"
 edition = "2021"
-authors = ["alexey <alexnagornnyy.an@gmail.com>"]
+authors = ["alexey <alexnagornnyy.an@gmail.com>", "partylikeits1983 <aleqvids@gmail.com>"]
 license = "Apache-2.0"
 
 [dependencies]
