@@ -1,51 +1,138 @@
 use dotenv::dotenv;
+use std::env;
+
 use fuels::{
-    prelude::{Provider, WalletUnlocked},
-    types::ContractId,
+    accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::AssetId,
+    types::ContractId, types::Identity,
 };
+use std::str::FromStr;
 
-use spark_market_sdk::{AssetType, MarketContract, OrderType};
-use std::{env, str::FromStr};
+use spark_market_sdk::{MarketContract, OrderType};
+use std::error::Error;
 
-const BASE_SIZE: u64 = 1; //units
-const BASE_PRICE: u64 = 69000; //units
-const ORDER_TYPE: OrderType = OrderType::Sell; //units
+pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
+    value * 10u64.pow(decimals)
+}
+
+pub fn format_to_readble_value(value: u64, decimals: u32) -> f64 {
+    value as f64 / 10u64.pow(decimals) as f64
+}
 
 #[tokio::main]
-async fn main() {
-    // print_title("Create Order");
+async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
-    let provider = Provider::connect("testnet.fuel.network").await.unwrap();
-    let secret = env::var("PRIVATE_KEY").unwrap();
-    let wallet =
-        WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider.clone()));
-    println!("wallet address = {:?}", wallet.address());
-    // let token_contract = TokenContract::new(
-    //     &ContractId::from_str("0x3141a3f11e3f784364d57860e3a4dcf9b73d42e23fd49038773cefb09c633348")
-    //         .unwrap()
-    //         .into(),
-    //     wallet.clone(),
-    // );
 
-    let contract_id = env::var("CONTRACT_ID").unwrap();
-    let market =
-        MarketContract::new(ContractId::from_str(&contract_id).unwrap(), wallet.clone()).await;
+    // Environment variables
+    let mnemonic = env::var("MNEMONIC")?;
+    let contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
 
-    let (
-        _,
-        _, // base_asset_id,
-        base_asset_decimals,
-        _, //quote_asset_id,
-        _, //quote_asset_decimals,
-        price_decimals,
-        _,
-    ) = market.config().await.unwrap().value;
+    // Connect to provider
+    let provider = Provider::connect("testnet.fuel.network").await?;
 
-    let base_size = BASE_SIZE * 10u64.pow(base_asset_decimals);
-    let base_price = BASE_PRICE * 10u64.pow(price_decimals);
+    let main_wallet =
+        WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
+    let contract_id = ContractId::from_str(&contract_id)?;
+    let market = MarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
-    market
-        .open_order(base_size, AssetType::Base, ORDER_TYPE, base_price)
-        .await
-        .unwrap();
+    // Fuel wallet address
+    let wallet_id: Identity = main_wallet.address().into();
+    println!("wallet {:?}", main_wallet.address().to_string());
+
+    let btc_id: String = env::var("BTC_ID")?;
+    let usdc_id: String = env::var("USDC_ID")?;
+
+    // Getting asset balances
+    if let Some(account) = market.account(wallet_id).await.unwrap().value {
+        let liquid_base = account.liquid.base;
+        let liquid_quote = account.liquid.quote;
+
+        println!("BTC Balance: {:?}", liquid_base);
+        println!("USDC Balance: {:?}", liquid_quote);
+    } else {
+        println!("Account not found or has no balance.");
+    }
+
+    // Depositing Assets
+    let btc_id = AssetId::from_str(&btc_id)?;
+    let btc_amount = format_value_with_decimals(1, 8);
+
+    let usdc_id = AssetId::from_str(&usdc_id)?;
+    let usdc_amount = format_value_with_decimals(10_000, 6);
+
+    println!("Depositing BTC");
+    match market.deposit(btc_amount, btc_id).await {
+        Ok(_) => {
+            println!("Deposit Success");
+            Ok(())
+        }
+        Err(e) => {
+            print!("Deposit error: {:?}", e);
+            Err(e)
+        }
+    }
+    .unwrap();
+
+    println!("Depositing USDC");
+    match market.deposit(usdc_amount, usdc_id).await {
+        Ok(_) => {
+            println!("Deposit Success");
+            Ok(())
+        }
+        Err(e) => {
+            print!("Deposit error: {:?}", e);
+            Err(e)
+        }
+    }
+    .unwrap();
+
+    // Creating Buy / Sell Limit Orders
+
+    // Buying 10_000 USDC worth of BTC
+    let buy_amount: u64 = usdc_amount;
+    let order_type: OrderType = OrderType::Buy;
+    let price: u64 = 70_000_000_000_000_u64;
+
+    println!(
+        "Opening Buy Order: {} USDC at {} BTC/USDC",
+        format_to_readble_value(buy_amount, 6),
+        format_to_readble_value(price, 9)
+    );
+    match market.open_order(buy_amount, order_type, price).await {
+        Ok(_) => {
+            println!("Open Buy Order Success");
+            Ok(())
+        }
+        Err(e) => {
+            print!("Open Buy Order Error: {:?}", e);
+            Err(e)
+        }
+    }
+    .unwrap();
+
+    // Selling 0.1 BTC for 70k USDC
+    let sell_amount: u64 = btc_amount;
+    let order_type = OrderType::Sell;
+    let price = 70_000_000_000_000_u64;
+
+    println!(
+        "Opening Sell Order: {} BTC at {} BTC/USDC",
+        format_to_readble_value(sell_amount, 8),
+        format_to_readble_value(price, 9)
+    );
+    match market.open_order(sell_amount, order_type, price).await {
+        Ok(_) => {
+            println!("Open Sell Order Success");
+            Ok(())
+        }
+        Err(e) => {
+            print!("Open Sell Order Error: {:?}", e);
+            Err(e)
+        }
+    }
+    .unwrap();
+
+    let orders = market.user_orders(wallet_id).await?.value;
+    println!("orders {:?}", orders);
+
+    Ok(())
 }
