@@ -5146,6 +5146,7 @@ dependencies = [
  "anyhow",
  "dotenv",
  "fuels",
+ "rand",
  "serde",
  "spark-market-sdk",
  "src20_sdk",

@@ -13,3 +13,4 @@ src20_sdk = { git = "https://github.com/compolabs/src-20.git", branch = "testnet
 anyhow = "1.0.86"
 dotenv = "0.15.0"
 serde = "1.0.204"
+rand = "0.8.5"
