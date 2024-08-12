@@ -1,6 +1,6 @@
 use dotenv::dotenv;
-use std::env;
 use rand::Rng;
+use std::env;
 
 use fuels::{
     accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::AssetId,
@@ -91,11 +91,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     for price in (46000..=72000).step_by(1000) {
         let price = format_value_with_decimals(price, 9);
-        
+
         // Randomize the order amounts between 2 and 10 USD
         let buy_amount = format_value_with_decimals(rng.gen_range(1000..5000), 6);
         let sell_amount = format_value_with_decimals(rng.gen_range(3..30), 6);
-        
+
         // Buy Order
         let order_type: OrderType = OrderType::Buy;
         println!(
