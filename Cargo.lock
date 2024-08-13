@@ -5131,7 +5131,7 @@ dependencies = [
 [[package]]
 name = "spark-market-sdk"
 version = "0.1.0"
-source = "git+https://github.com/compolabs/orderbook-contract.git?branch=sdk-tests#879d1f14c340cedbed8217a3305cf5989d8ffd6b"
+source = "git+https://github.com/compolabs/orderbook-contract.git?branch=master#737257d03fb09d04c2647ce99b0477e48a86026e"
 dependencies = [
  "anyhow",
  "fuels",
