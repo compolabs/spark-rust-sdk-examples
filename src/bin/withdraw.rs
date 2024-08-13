@@ -3,7 +3,7 @@ use std::env;
 
 use fuels::{
     accounts::provider::Provider, accounts::wallet::WalletUnlocked, prelude::CallHandler,
-    types::AssetId, types::ContractId, types::Identity,
+    types::ContractId, types::Identity,
 };
 use std::str::FromStr;
 

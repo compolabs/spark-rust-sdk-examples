@@ -2,3 +2,7 @@
 
 This repository contains examples of how to deposit liquidity, open orders, batch cancel orders, and withdraw liquidity from Spark. 
 
+On using fuel's multicall functionality it is possible to open and close multiple orders in a single transaction.
+
+
+
