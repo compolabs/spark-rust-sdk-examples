@@ -31,21 +31,21 @@ async fn main() {
     let market =
         MarketContract::new(ContractId::from_str(&contract_id).unwrap(), wallet.clone()).await;
 
-    let (
-        _,
-        _, // base_asset_id,
-        base_asset_decimals,
-        _, //quote_asset_id,
-        _, //quote_asset_decimals,
-        price_decimals,
-        _,
-    ) = market.config().await.unwrap().value;
-
-    let base_size = BASE_SIZE * 10u64.pow(base_asset_decimals);
-    let base_price = BASE_PRICE * 10u64.pow(price_decimals);
-
-    market
-        .open_order(base_size, AssetType::Base, ORDER_TYPE, base_price)
-        .await
-        .unwrap();
+    // let (
+    //     _,
+    //     _, // base_asset_id,
+    //     base_asset_decimals,
+    //     _, //quote_asset_id,
+    //     _, //quote_asset_decimals,
+    //     price_decimals,
+    //     _,
+    // ) = market.config().await.unwrap().value;
+    //
+    // let base_size = BASE_SIZE * 10u64.pow(base_asset_decimals);
+    // let base_price = BASE_PRICE * 10u64.pow(price_decimals);
+    //
+    // market
+    //     .open_order(base_size, AssetType::Base, ORDER_TYPE, base_price)
+    //     .await
+    //     .unwrap();
 }
