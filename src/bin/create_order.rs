@@ -1,9 +1,9 @@
 use dotenv::dotenv;
-use std::env;
+use std::{default, env};
 
 use fuels::{
-    accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::AssetId,
-    types::ContractId, types::Identity,
+    accounts::{provider::Provider, wallet::WalletUnlocked, ViewOnlyAccount},
+    types::{AssetId, ContractId, Identity},
 };
 use std::str::FromStr;
 
@@ -42,15 +42,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id: String = env::var("USDC_ID")?;
 
     // Getting asset balances
-    if let Some(account) = market.account(wallet_id).await.unwrap().value {
-        let liquid_base = account.liquid.base;
-        let liquid_quote = account.liquid.quote;
-
-        println!("BTC Balance: {:?}", liquid_base);
-        println!("USDC Balance: {:?}", liquid_quote);
-    } else {
-        println!("Account not found or has no balance.");
-    }
+    let account = market.account(wallet_id).await.unwrap().value;
+    println!("account: {:?}", account);
 
     // Depositing Assets
     let btc_id = AssetId::from_str(&btc_id)?;
@@ -58,6 +51,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
     let usdc_amount = format_value_with_decimals(10_000, 6);
+
+    let btc_bal = main_wallet.get_asset_balance(&btc_id).await?;
+    let usd_bal = main_wallet.get_asset_balance(&usdc_id).await?;
+
+    println!("btc balance: {:?}", btc_bal);
+    println!("usdc balance: {:?}", usd_bal);
 
     println!("Depositing BTC");
     match market.deposit(btc_amount, btc_id).await {
@@ -88,7 +87,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Creating Buy / Sell Limit Orders
 
     // Buying 10_000 USDC worth of BTC
-    let buy_amount: u64 = usdc_amount;
+    let buy_amount: u64 = 10_000_000;
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
@@ -133,6 +132,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let orders = market.user_orders(wallet_id).await?.value;
     println!("orders {:?}", orders);
+
+    let account = market.account(wallet_id).await.unwrap().value;
+    println!("account: {:?}", account);
 
     Ok(())
 }

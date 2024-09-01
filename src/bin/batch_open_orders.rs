@@ -76,9 +76,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Creating Buy / Sell Limit Orders in a single transaction
 
-    let protocol_fee = market.protocol_fee().await?.value as u64;
+    let protocol_fee = market.protocol_fee().await?.value;
+
+    println!("protocol_fee: {:?}", protocol_fee);
+
     let matcher_fee = market.matcher_fee().await?.value as u64;
-    let open_order_call_params = CallParameters::default().with_amount(matcher_fee + protocol_fee);
+    let open_order_call_params = CallParameters::default().with_amount(matcher_fee);
 
     let buy_order_type = OrderType::Buy;
     let buy_order_amount = format_value_with_decimals(1000, 6);

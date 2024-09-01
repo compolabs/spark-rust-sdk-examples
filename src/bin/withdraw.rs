@@ -39,15 +39,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("wallet {:?}", main_wallet.address().to_string());
 
     // Getting asset balances
-    if let Some(account) = market.account(wallet_id).await.unwrap().value {
-        let liquid_base = account.liquid.base;
-        let liquid_quote = account.liquid.quote;
+    let account = market.account(wallet_id).await.unwrap().value;
+    let liquid_base = account.liquid.base;
+    let liquid_quote = account.liquid.quote;
 
-        println!("BTC Balance: {:?}", liquid_base);
-        println!("USDC Balance: {:?}", liquid_quote);
-    } else {
-        println!("Account not found or has no balance.");
-    }
+    println!("BTC Balance: {:?}", liquid_base);
+    println!("USDC Balance: {:?}", liquid_quote);
 
     // Asset Amounts
     let btc_amount = format_value_with_decimals(1, 6);

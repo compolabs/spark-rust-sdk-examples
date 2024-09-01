@@ -43,15 +43,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id: String = env::var("USDC_ID")?;
 
     // Getting asset balances
-    if let Some(account) = market.account(wallet_id).await.unwrap().value {
-        let liquid_base = account.liquid.base;
-        let liquid_quote = account.liquid.quote;
-
-        println!("BTC Balance: {:?}", liquid_base);
-        println!("USDC Balance: {:?}", liquid_quote);
-    } else {
-        println!("Account not found or has no balance.");
-    }
+    let account = market.account(wallet_id).await.unwrap().value;
+    let liquid_base = account.liquid.base;
+    let liquid_quote = account.liquid.quote;
 
     // Depositing Assets
     let btc_id = AssetId::from_str(&btc_id)?;
