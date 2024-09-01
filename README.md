@@ -11,7 +11,7 @@ To mint testnet tokens via the UI: [Spark Testnet Faucet](https://app.sprk.fi/#/
 
 To mint testnet tokens via the CLI:
 
-Clone the [multiasset-contract](https://github.com/compolabs/multiasset-contract) and run the following command:
+Clone the [multiasset-contract](https://github.com/compolabs/multiasset-contract), build, and run the following command inside the multiasset directory:
 ```
 ./target/release/multiasset_sdk core mint \
 --recipient-id {recipeint address} \
