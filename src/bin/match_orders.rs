@@ -67,13 +67,13 @@ async fn main() -> Result<()> {
     // Creating Buy / Sell Limit Orders
 
     // Buying 10_000 USDC worth of BTC
-    let buy_amount: u64 = usdc_amount;
+    let buy_amount = 10_000_000; // 0.1 BTC
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
     println!(
-        "Opening Buy Order: {} USDC at {} BTC/USDC",
-        format_to_readable_value(buy_amount, 6),
+        "Opening Buy Order: {} BTC at {} BTC/USDC",
+        format_to_readable_value(buy_amount, 8),
         format_to_readable_value(price, 9)
     );
     let order_id0 = market

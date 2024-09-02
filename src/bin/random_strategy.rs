@@ -44,8 +44,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Getting asset balances
     let account = market.account(wallet_id).await.unwrap().value;
-    let liquid_base = account.liquid.base;
-    let liquid_quote = account.liquid.quote;
+    println!("account balance: {:?}", account);
 
     // Depositing Assets
     let btc_id = AssetId::from_str(&btc_id)?;
@@ -87,14 +86,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let price = format_value_with_decimals(price, 9);
 
         // Randomize the order amounts between 2 and 10 USD
-        let buy_amount = format_value_with_decimals(rng.gen_range(1000..5000), 6);
+        let buy_amount = format_value_with_decimals(rng.gen_range(1..50), 6);
         let sell_amount = format_value_with_decimals(rng.gen_range(3..30), 6);
 
         // Buy Order
         let order_type: OrderType = OrderType::Buy;
         println!(
-            "Opening Buy Order: {} USDC at {} BTC/USDC",
-            format_to_readble_value(buy_amount, 6),
+            "Opening Buy Order: {} BTC at {} BTC/USDC",
+            format_to_readble_value(buy_amount, 8),
             format_to_readble_value(price, 9)
         );
         match market.open_order(buy_amount, order_type, price).await {
@@ -105,8 +104,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // Sell Order
         let order_type: OrderType = OrderType::Sell;
         println!(
-            "Opening Sell Order: {} USDC at {} BTC/USDC",
-            format_to_readble_value(sell_amount, 6),
+            "Opening Sell Order: {} BTC at {} BTC/USDC",
+            format_to_readble_value(sell_amount, 8),
             format_to_readble_value(price, 9)
         );
         match market.open_order(sell_amount, order_type, price).await {

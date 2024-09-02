@@ -52,14 +52,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Creating Buy / Sell Limit Orders
 
-    // Buying 10_000 USDC worth of BTC
-    let buy_amount: u64 = usdc_amount;
+    // Buying 0.1 BTC
+    let buy_amount: u64 = 10_000_000;
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
     println!(
-        "Opening Buy Order: {} USDC at {} BTC/USDC",
-        format_to_readble_value(buy_amount, 4),
+        "Opening Buy Order: {} BTC at {} BTC/USDC",
+        format_to_readble_value(buy_amount, 8),
         format_to_readble_value(price, 9)
     );
     match market.open_order(buy_amount, order_type, price).await {

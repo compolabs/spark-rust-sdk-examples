@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use std::{default, env};
+use std::env;
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked, ViewOnlyAccount},
@@ -87,13 +87,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Creating Buy / Sell Limit Orders
 
     // Buying 10_000 USDC worth of BTC
-    let buy_amount: u64 = 10_000_000;
+    let buy_amount = (usdc_amount as f64 / 70000.0 * 10_u64.pow(8) as f64) as u64;
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
     println!(
-        "Opening Buy Order: {} USDC at {} BTC/USDC",
-        format_to_readable_value(buy_amount, 6),
+        "Opening Buy Order: {} BTC at {} BTC/USDC",
+        format_to_readable_value(buy_amount, 8),
         format_to_readable_value(price, 9)
     );
     match market.open_order(buy_amount, order_type, price).await {
