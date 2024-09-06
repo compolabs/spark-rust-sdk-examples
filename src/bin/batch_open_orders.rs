@@ -7,7 +7,7 @@ use fuels::{
 };
 use std::str::FromStr;
 
-use spark_market_sdk::{MarketContract, OrderType};
+use spark_market_sdk::{OrderType, SparkMarketContract};
 use std::error::Error;
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
     let contract_id = ContractId::from_str(&contract_id)?;
-    let market = MarketContract::new(contract_id.clone(), main_wallet.clone()).await;
+    let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
     // Fuel wallet address
     let wallet_id: Identity = main_wallet.address().into();
@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     > = CallHandler::new_multi_call(main_wallet.clone());
 
     // Deposit Calls
-    let deposit_btc_call_params = CallParameters::new(btc_amount, btc_id, 1_000_000);
+    let deposit_btc_call_params = CallParameters::new(btc_amount, btc_id, 10_000_000);
     let deposit_btc_call = market
         .get_instance()
         .methods()
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .call_params(deposit_btc_call_params)
         .unwrap();
 
-    let deposit_usdc_call_params = CallParameters::new(usdc_amount, usdc_id, 1_000_000);
+    let deposit_usdc_call_params = CallParameters::new(usdc_amount, usdc_id, 10_000_000);
     let deposit_usdc_call = market
         .get_instance()
         .methods()
@@ -77,16 +77,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Creating Buy / Sell Limit Orders in a single transaction
 
     let protocol_fee = market.protocol_fee().await?.value;
-
     println!("protocol_fee: {:?}", protocol_fee);
 
-    let matcher_fee = market.matcher_fee().await?.value as u64;
-    let open_order_call_params = CallParameters::default().with_amount(matcher_fee);
+    // let matcher_fee = market.matcher_fee().await?.value as u64;
+    let open_order_call_params = CallParameters::default();
 
     let buy_order_type = OrderType::Buy;
-    let buy_order_amount = format_value_with_decimals(1000, 6);
+    let buy_order_amount = 1_000_000; // 0.01 BTC
     let buy_start_price = 55_000u64;
-    let sell_order_amount = format_value_with_decimals(2, 6);
+    let sell_order_amount = 1_000_000;
     let sell_start_price = 65_000u64;
     let step = 500;
 

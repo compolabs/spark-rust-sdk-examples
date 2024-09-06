@@ -2,13 +2,12 @@ use dotenv::dotenv;
 use std::env;
 
 use fuels::{
-    accounts::provider::Provider, accounts::wallet::WalletUnlocked, programs::calls::CallHandler,
-    types::ContractId, types::Identity,
+    accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::ContractId,
+    types::Identity,
 };
 use std::str::FromStr;
 
-use spark_market_sdk::MarketContract;
-// use multiasset_sdk::MultiAssetContract;
+use spark_market_sdk::SparkMarketContract;
 
 use std::error::Error;
 
@@ -37,12 +36,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
 
     let market_contract_id = ContractId::from_str(&market_contract_id)?;
-    let _market = MarketContract::new(market_contract_id.clone(), main_wallet.clone()).await;
+    let _market = SparkMarketContract::new(market_contract_id.clone(), main_wallet.clone()).await;
 
-    let btc_id = ContractId::from_str(&btc_id);
-    let usdc_id = ContractId::from_str(&usdc_id);
-
-    // let btc_src20 = Asset::new(main_wallet.clone(), btc_id.clone()).await;
+    // @dev we need to use src20 => deploy it to crates
+    // let btc_id = ContractId::from_str(&btc_id);
+    // let usdc_id = ContractId::from_str(&usdc_id);
 
     // Fuel wallet address
     let _wallet_id: Identity = main_wallet.address().into();

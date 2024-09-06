@@ -8,7 +8,7 @@ use fuels::{
 use std::str::FromStr;
 
 use anyhow::Result;
-use spark_market_sdk::{MarketContract, OrderType};
+use spark_market_sdk::{OrderType, SparkMarketContract};
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
     value * 10u64.pow(decimals)
@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
     let contract_id = ContractId::from_str(&contract_id).unwrap();
-    let market = MarketContract::new(contract_id.clone(), main_wallet.clone()).await;
+    let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
     // Fuel wallet address
     let wallet_id: Identity = main_wallet.address().into();
@@ -99,8 +99,10 @@ async fn main() -> Result<()> {
     // Matching the two orders
     println!("Matching Orders: {:?} and {:?}", order_id0, order_id1);
     market.match_order_pair(order_id0, order_id1).await?;
-
     println!("Orders Matched Successfully");
+
+    let account = market.account(wallet_id).await?.value;
+    println!("account: {:?}", account);
 
     Ok(())
 }

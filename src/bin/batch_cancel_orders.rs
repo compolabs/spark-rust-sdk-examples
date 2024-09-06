@@ -7,7 +7,7 @@ use fuels::{
 };
 use std::str::FromStr;
 
-use spark_market_sdk::MarketContract;
+use spark_market_sdk::SparkMarketContract;
 use std::error::Error;
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
     let contract_id = ContractId::from_str(&contract_id)?;
-    let market = MarketContract::new(contract_id.clone(), main_wallet.clone()).await;
+    let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
     // Fuel wallet address
     let wallet_id: Identity = main_wallet.address().into();
@@ -57,8 +57,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Execute all the prepared calls in a single transaction
     println!("cancelling {} orders", orders.len());
     if orders.len() > 0 {
-        let cancel_order_multicall_tx = multi_call_handler.submit().await?;
-        println!("Submitted tx: {:?}", cancel_order_multicall_tx);
+        let _cancel_order_multicall_tx = multi_call_handler.submit().await?;
+        println!("success");
     } else {
         println!("No orders to cancel");
     }

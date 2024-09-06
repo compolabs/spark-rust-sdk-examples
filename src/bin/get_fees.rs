@@ -1,25 +1,22 @@
 use dotenv::dotenv;
 use std::env;
 
-use fuels::{
-    accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::ContractId,
-    types::Identity,
-};
+use fuels::{accounts::provider::Provider, accounts::wallet::WalletUnlocked, types::ContractId};
 use std::str::FromStr;
 
+use anyhow::Result;
 use spark_market_sdk::SparkMarketContract;
-use std::error::Error;
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
     value * 10u64.pow(decimals)
 }
 
-pub fn format_to_readble_value(value: u64, decimals: u32) -> f64 {
+pub fn format_to_readable_value(value: u64, decimals: u32) -> f64 {
     value as f64 / 10u64.pow(decimals) as f64
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     dotenv().ok();
 
     // Environment variables
@@ -31,16 +28,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
-    let contract_id = ContractId::from_str(&contract_id)?;
+    let contract_id = ContractId::from_str(&contract_id).unwrap();
     let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
-    // Fuel wallet address
-    let wallet_id: Identity = main_wallet.address().into();
-    println!("wallet {:?}", main_wallet.address().to_string());
+    // Getting Fees from Spark Market
+    let matcher_fee = market.matcher_fee().await?.value;
+    println!("matcher_fee: {:?}", matcher_fee);
 
-    // Fetching user orders
-    let orders = market.user_orders(wallet_id).await?.value;
-    println!("User Orders: {:?}", orders.len());
+    let protocol_fee = market.protocol_fee().await?.value;
+    println!("protocol fee: {:?}", protocol_fee);
 
     Ok(())
 }

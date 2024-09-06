@@ -7,7 +7,7 @@ use fuels::{
 };
 use std::str::FromStr;
 
-use spark_market_sdk::{MarketContract, OrderType};
+use spark_market_sdk::{OrderType, SparkMarketContract};
 use std::error::Error;
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
     let contract_id = ContractId::from_str(&contract_id)?;
-    let market = MarketContract::new(contract_id.clone(), main_wallet.clone()).await;
+    let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
 
     // Fuel wallet address
     let wallet_id: Identity = main_wallet.address().into();
@@ -84,10 +84,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     .unwrap();
 
+    let account = market.account(wallet_id).await?.value;
+    println!("account: {:?}", account);
+
     // Creating Buy / Sell Limit Orders
 
-    // Buying 10_000 USDC worth of BTC
-    let buy_amount = (usdc_amount as f64 / 70000.0 * 10_u64.pow(8) as f64) as u64;
+    // Buying 0.1 BTC
+    let buy_amount = 10_000_000; // 0.1 BTC
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
@@ -109,7 +112,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .unwrap();
 
     // Selling 0.1 BTC for 70k USDC
-    let sell_amount: u64 = btc_amount;
+    let sell_amount: u64 = buy_amount;
     let order_type = OrderType::Sell;
     let price = 70_000_000_000_000_u64;
 
@@ -131,7 +134,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .unwrap();
 
     let orders = market.user_orders(wallet_id).await?.value;
-    println!("orders {:?}", orders);
+    println!("orders {:?}", orders.len());
 
     let account = market.account(wallet_id).await.unwrap().value;
     println!("account: {:?}", account);
