@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     > = CallHandler::new_multi_call(main_wallet.clone());
 
     // Deposit Calls
-    let deposit_btc_call_params = CallParameters::new(btc_amount, btc_id, 10_000_000);
+    let deposit_btc_call_params = CallParameters::new(btc_amount, btc_id, 20_000_000);
     let deposit_btc_call = market
         .get_instance()
         .methods()
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .call_params(deposit_btc_call_params)
         .unwrap();
 
-    let deposit_usdc_call_params = CallParameters::new(usdc_amount, usdc_id, 10_000_000);
+    let deposit_usdc_call_params = CallParameters::new(usdc_amount, usdc_id, 20_000_000);
     let deposit_usdc_call = market
         .get_instance()
         .methods()
