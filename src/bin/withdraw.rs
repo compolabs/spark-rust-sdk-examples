@@ -7,7 +7,7 @@ use fuels::{
 };
 use std::str::FromStr;
 
-use spark_market_sdk::{AssetType, OrderType, SparkMarketContract};
+use spark_market_sdk::{AssetType, SparkMarketContract};
 use std::error::Error;
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
-    let contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
+    let contract_id = env::var("ETH_USDC_CONTRACT_ID")?;
 
     // Connect to provider
     let provider = Provider::connect("testnet.fuel.network").await?;
@@ -43,58 +43,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let liquid_base = account.liquid.base;
     let liquid_quote = account.liquid.quote;
 
-    println!("BTC Balance: {:?}", liquid_base);
-    println!("USDC Balance: {:?}", liquid_quote);
-
-    // Asset Amounts
-    let btc_amount = format_value_with_decimals(1, 6);
-    let usdc_amount = format_value_with_decimals(10_000, 5);
-
-    // Creating Buy / Sell Limit Orders
-
-    // Buying 0.1 BTC
-    let buy_amount: u64 = 10_000_000;
-    let order_type: OrderType = OrderType::Buy;
-    let price: u64 = 70_000_000_000_000_u64;
-
-    println!(
-        "Opening Buy Order: {} BTC at {} BTC/USDC",
-        format_to_readble_value(buy_amount, 8),
-        format_to_readble_value(price, 9)
-    );
-    match market.open_order(buy_amount, order_type, price).await {
-        Ok(_) => {
-            println!("Open Buy Order Success");
-            Ok(())
-        }
-        Err(e) => {
-            print!("Open Buy Order Error: {:?}", e);
-            Err(e)
-        }
-    }
-    .unwrap();
-
-    // Selling 0.1 BTC for 70k USDC
-    let sell_amount: u64 = btc_amount;
-    let order_type = OrderType::Sell;
-    let price = 70_000_000_000_000_u64;
-
-    println!(
-        "Opening Sell Order: {} BTC at {} BTC/USDC",
-        format_to_readble_value(sell_amount, 7),
-        format_to_readble_value(price, 9)
-    );
-    match market.open_order(sell_amount, order_type, price).await {
-        Ok(_) => {
-            println!("Open Sell Order Success");
-            Ok(())
-        }
-        Err(e) => {
-            print!("Open Sell Order Error: {:?}", e);
-            Err(e)
-        }
-    }
-    .unwrap();
+    println!("base balance: {:?}", liquid_base);
+    println!("quote balance: {:?}", liquid_quote);
 
     // Fetching user orders
     let orders = market.user_orders(wallet_id).await?.value;
@@ -121,17 +71,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Withdraw assets after canceling orders
-    let btc_withdraw_amount = btc_amount;
-    let usdc_withdraw_amount = usdc_amount;
+    let base_withdraw_amount = liquid_base;
+    let quote_withdraw_amount = liquid_quote;
 
-    println!("Withdrawing BTC");
-    match market.withdraw(btc_withdraw_amount, AssetType::Base).await {
+    println!("Withdrawing base");
+    match market.withdraw(base_withdraw_amount, AssetType::Base).await {
         Ok(_) => {
-            println!("Withdraw BTC Success");
+            println!("Withdraw base Success");
             Ok(())
         }
         Err(e) => {
-            print!("Withdraw BTC Error: {:?}", e);
+            print!("Withdraw base Error: {:?}", e);
             Err(e)
         }
     }
@@ -139,15 +89,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Withdrawing USDC");
     match market
-        .withdraw(usdc_withdraw_amount, AssetType::Quote)
+        .withdraw(quote_withdraw_amount, AssetType::Quote)
         .await
     {
         Ok(_) => {
-            println!("Withdraw USDC Success");
+            println!("Withdraw quote Success");
             Ok(())
         }
         Err(e) => {
-            print!("Withdraw USDC Error: {:?}", e);
+            print!("Withdraw quote Error: {:?}", e);
             Err(e)
         }
     }
