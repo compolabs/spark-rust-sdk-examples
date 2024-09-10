@@ -5023,6 +5023,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "spark-registry-sdk"
+version = "0.3.1"
+source = "git+https://github.com/compolabs/orderbook-contract?branch=release-0.3.0-fuel-rs-0.65.1#9440bde462494af2f524f86f5cb208e8dbda418a"
+dependencies = [
+ "anyhow",
+ "fuels",
+ "rand",
+ "tokio",
+]
+
+[[package]]
 name = "spark-rust-sdk-examples"
 version = "0.1.0"
 dependencies = [
@@ -5032,6 +5043,7 @@ dependencies = [
  "rand",
  "serde",
  "spark-market-sdk",
+ "spark-registry-sdk",
  "tokio",
 ]
 
