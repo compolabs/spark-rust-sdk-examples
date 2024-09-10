@@ -6,9 +6,10 @@ authors = ["alexey <alexnagornnyy.an@gmail.com>", "partylikeits1983 <aleqvids@gm
 license = "Apache-2.0"
 
 [dependencies]
-fuels = { version = "0.66.3", features = ["fuel-core-lib"] }
+fuels = { version = "0.65.1", features = ["fuel-core-lib"] }
 tokio = { version = "1.12", features = ["rt", "macros"] }
-spark-market-sdk = { version = "0.3.1" }
+# spark-market-sdk = { version = "0.3.1" }
+spark-market-sdk = { git = "https://github.com/compolabs/orderbook-contract", branch = "release-0.3.0-fuel-rs-0.65.1" }
 
 anyhow = "1.0.86"
 dotenv = "0.15.0"
