@@ -8,11 +8,11 @@ On using fuel's multicall functionality it is possible to open and close multipl
 
 ## Deployment Addresses
 
-Spark Market Registry (vo.3.1): `0x0ced80a8ce2cc8a3d39a88483edd961b2b7e9e5028f27cd2766f03fc61c406c9`
+Spark Market Registry: `0x8f7935292f3da69aec797926029c864d7ec6d03c72f7347b4fd517ba4a7b78fb`
 
-Spark Market BTC/USDC (v0.3.1): `0x8c84df7be0c095c5bac97e66e24aa00f4f51d50e207f2687128bd180a804cff6`
+Spark Market BTC/USDC: `0x416ccdaf69881ae345537b1844d1511b4103379fca43b8c2190aae8b42f08173`
 
-Spark Market ETH/USDC (v0.3.1): `0x352f7acf2286f4bddc278cfe8b0f84313ba46a1b71b7b9e7c5fc4869c93db8bb`
+Spark Market ETH/USDC: `0x7d1da52a221897ebc88dc6a5d4623e704f7d64022d498b0438827dd79b6e5457`
 
 ## Default Fees
 
@@ -30,7 +30,6 @@ Spark Market ETH/USDC (v0.3.1): `0x352f7acf2286f4bddc278cfe8b0f84313ba46a1b71b7b
 ### Matcher Fee: 
 $0.001 USD
 *On the contract side, the matcher fee is in the base unit of the quote asset. If the quote asset is USDC, this will be in base 1e6*
-
 
 
 ## Minting testnet tokens:
