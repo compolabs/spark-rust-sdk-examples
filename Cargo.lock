@@ -5405,6 +5405,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "spark-registry-sdk"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed3cc0ceb86a174fb647d393af23f337b038541e71c3ad02a8077fbbbe70e5b4"
+dependencies = [
+ "anyhow",
+ "fuels",
+ "rand",
+ "tokio",
+]
+
+[[package]]
 name = "spark-rust-sdk-examples"
 version = "0.1.0"
 dependencies = [
@@ -5414,6 +5426,7 @@ dependencies = [
  "rand",
  "serde",
  "spark-market-sdk",
+ "spark-registry-sdk",
  "tokio",
 ]
 
