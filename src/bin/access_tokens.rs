@@ -26,8 +26,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
     let market_contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
-    let btc_id = env::var("BTC_ID")?;
-    let usdc_id = env::var("USDC_ID")?;
+    let _btc_id = env::var("BTC_ID")?;
+    let _usdc_id = env::var("USDC_ID")?;
 
     // Connect to provider
     let provider = Provider::connect("testnet.fuel.network").await?;
