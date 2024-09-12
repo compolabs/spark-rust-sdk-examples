@@ -36,3 +36,13 @@ $0.001 USD
 ## Minting testnet tokens:
 
 To mint testnet tokens via the UI: [Spark Testnet Faucet](https://app.sprk.fi/#/faucet)
+
+
+# Running tests:
+```
+rustup target add wasm32-unknown-unknown
+```
+
+```
+cargo build
+```

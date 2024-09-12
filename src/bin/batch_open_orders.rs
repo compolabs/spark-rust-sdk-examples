@@ -1,14 +1,16 @@
 use dotenv::dotenv;
-use std::env;
+use std::{env, error::Error, str::FromStr};
 
 use fuels::{
-    accounts::provider::Provider, accounts::wallet::WalletUnlocked, prelude::CallParameters,
-    programs::calls::CallHandler, types::AssetId, types::ContractId, types::Identity,
+    accounts::{provider::Provider, wallet::WalletUnlocked},
+    prelude::CallParameters,
+    programs::calls::CallHandler,
+    types::{AssetId, ContractId, Identity},
 };
-use std::str::FromStr;
 
 use spark_market_sdk::{OrderType, SparkMarketContract};
-use std::error::Error;
+
+use tokio::time::{sleep, Duration};
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
     value * 10u64.pow(decimals)
@@ -43,10 +45,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let btc_id = AssetId::from_str(&btc_id)?;
-    let btc_amount = format_value_with_decimals(1, 8);
+    let btc_amount = format_value_with_decimals(1, 6);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
-    let usdc_amount = format_value_with_decimals(10_000, 6);
+    let usdc_amount = format_value_with_decimals(3_000, 6);
 
     let mut multi_call_handler: CallHandler<
         WalletUnlocked,
@@ -74,8 +76,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     multi_call_handler = multi_call_handler.add_call(deposit_btc_call);
     multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
 
-    // Creating Buy / Sell Limit Orders in a single transaction
-
     let protocol_fee = market.protocol_fee().await?.value;
     println!("protocol_fee: {:?}", protocol_fee);
 
@@ -83,12 +83,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let open_order_call_params = CallParameters::default();
 
     let buy_order_type = OrderType::Buy;
-    let buy_order_amount = 1_000_000; // 0.01 BTC
-    let buy_start_price = 55_000u64;
-    let sell_order_amount = 1_000_000;
-    let sell_start_price = 65_000u64;
+    let buy_order_amount = 100_000; // 0.001 BTC
+    let buy_start_price = 50_000u64; // 50k
+    let sell_order_amount = 100_000; // 0.001 BTC
+    let sell_start_price = 51_000u64; // 51k
     let step = 500;
 
+    // Creating Buy / Sell Limit Orders in a single transaction
     for i in 0..5 {
         let buy_open_price = (buy_start_price + i * step) * 1_000_000_000_u64;
         let sell_open_price = (sell_start_price + i * step) * 1_000_000_000_u64;
@@ -113,7 +114,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Execute all the prepared calls in a single transaction (deposit & open orders)
     let multicall_tx_result = multi_call_handler.submit().await?;
-    println!("Multicall tx result: {:?}", multicall_tx_result);
+
+    let tx_id = multicall_tx_result.tx_id();
+    println!("multicall transaction id: 0x{:?}", tx_id);
+
+    sleep(Duration::from_secs(1)).await;
 
     let orders = market.user_orders(wallet_id).await?.value;
     println!("Number of Orders: {:?}", orders.len());

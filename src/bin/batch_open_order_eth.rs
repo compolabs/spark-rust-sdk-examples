@@ -18,6 +18,7 @@ pub fn format_to_readable_value(value: u64, decimals: u32) -> f64 {
     value as f64 / 10u64.pow(decimals) as f64
 }
 
+// Might fail if you don't have enough testnet ETH
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
@@ -43,10 +44,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let eth_id = AssetId::from_str(&eth_id)?;
-    let eth_amount = format_value_with_decimals(1, 9);
+    let eth_amount = format_value_with_decimals(1, 6);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
-    let usdc_amount = format_value_with_decimals(10_000, 6);
+    let usdc_amount = format_value_with_decimals(3_000, 6);
 
     let mut multi_call_handler: CallHandler<
         WalletUnlocked,
@@ -83,7 +84,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let open_order_call_params = CallParameters::default();
 
     let buy_order_type = OrderType::Buy;
-    let buy_order_amount = 500_000; // 0.005 BTC
+    let buy_order_amount = 500_000; // 0.005 ETH
     let buy_start_price = 2_000u64;
     let sell_order_amount = 1_000_000;
     let sell_start_price = 2_100u64;

@@ -44,10 +44,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let btc_id = AssetId::from_str(&btc_id)?;
-    let btc_amount = format_value_with_decimals(1, 8);
+    let btc_amount = format_value_with_decimals(1, 6);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
-    let usdc_amount = format_value_with_decimals(10_000, 6);
+    let usdc_amount = format_value_with_decimals(3_000, 6);
 
     let mut multi_call_handler: CallHandler<
         WalletUnlocked,
@@ -82,7 +82,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let open_order_call_params = CallParameters::default();
 
-    let sell_order_amount = 1_000_000; // 0.01 BTC
+    let sell_order_amount = 100_000; // 0.001 BTC
     let sell_start_price = 50_500u64;
     let step = 100;
 
@@ -103,7 +103,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _multicall_tx_result = multi_call_handler.submit().await?;
     // println!("Multicall tx result: {:?}", multicall_tx_result);
 
-    // do a 2 second timeout here
     match timeout(Duration::from_secs(2), market.user_orders(wallet_id)).await {
         Ok(orders_result) => {
             let order_ids = orders_result?.value;
@@ -121,7 +120,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("account before fulfill_order_many: {:?}", account);
 
     // Swap Order Details
-    let buy_order_amount = 5_000_000; // 0.05 BTC
+    let buy_order_amount = 500_000; // 0.005 BTC
     let buy_start_price = 50_500 * 1_000_000_000_u64;
     let slippage = 10u64; // 10%
 
