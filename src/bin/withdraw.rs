@@ -74,34 +74,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let base_withdraw_amount = liquid_base;
     let quote_withdraw_amount = liquid_quote;
 
-    println!("Withdrawing base");
-    match market.withdraw(base_withdraw_amount, AssetType::Base).await {
-        Ok(_) => {
-            println!("Withdraw base Success");
-            Ok(())
+    if base_withdraw_amount > 0 {
+        println!("Withdrawing base");
+        match market.withdraw(base_withdraw_amount, AssetType::Base).await {
+            Ok(_) => {
+                println!("Withdraw base Success");
+                Ok(())
+            }
+            Err(e) => {
+                print!("Withdraw base Error: {:?}", e);
+                Err(e)
+            }
         }
-        Err(e) => {
-            print!("Withdraw base Error: {:?}", e);
-            Err(e)
-        }
+        .unwrap();
     }
-    .unwrap();
 
-    println!("Withdrawing USDC");
-    match market
-        .withdraw(quote_withdraw_amount, AssetType::Quote)
-        .await
-    {
-        Ok(_) => {
-            println!("Withdraw quote Success");
-            Ok(())
+    if quote_withdraw_amount > 0 {
+        println!("Withdrawing USDC");
+        match market
+            .withdraw(quote_withdraw_amount, AssetType::Quote)
+            .await
+        {
+            Ok(_) => {
+                println!("Withdraw quote Success");
+                Ok(())
+            }
+            Err(e) => {
+                print!("Withdraw quote Error: {:?}", e);
+                Err(e)
+            }
         }
-        Err(e) => {
-            print!("Withdraw quote Error: {:?}", e);
-            Err(e)
-        }
+        .unwrap();
     }
-    .unwrap();
-
     Ok(())
 }

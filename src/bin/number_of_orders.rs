@@ -24,8 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
-    let contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
-    // let contract_id = env::var("ETH_USDC_CONTRACT_ID")?;
+    let contract_id = env::var("ETH_USDC_CONTRACT_ID")?;
 
     // Connect to provider
     let provider = Provider::connect("testnet.fuel.network").await?;
@@ -42,6 +41,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Fetching user orders
     let orders = market.user_orders(wallet_id).await?.value;
     println!("User Orders: {:?}", orders.len());
+
+    let account = market.account(wallet_id.clone()).await?.value;
+    println!("BTC account before: {:?}", account);
 
     Ok(())
 }

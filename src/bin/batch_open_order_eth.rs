@@ -1,14 +1,16 @@
 use dotenv::dotenv;
-use std::env;
+use std::{env, error::Error, str::FromStr};
 
 use fuels::{
-    accounts::provider::Provider, accounts::wallet::WalletUnlocked, prelude::CallParameters,
-    programs::calls::CallHandler, types::AssetId, types::ContractId, types::Identity,
+    accounts::{provider::Provider, wallet::WalletUnlocked},
+    prelude::CallParameters,
+    programs::calls::CallHandler,
+    types::{AssetId, ContractId, Identity},
 };
-use std::str::FromStr;
 
 use spark_market_sdk::{OrderType, SparkMarketContract};
-use std::error::Error;
+
+use tokio::time::{sleep, Duration};
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
     value * 10u64.pow(decimals)
@@ -113,8 +115,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Execute all the prepared calls in a single transaction (deposit & open orders)
-    let multicall_tx_result = multi_call_handler.submit().await?;
-    println!("Multicall tx result: {:?}", multicall_tx_result);
+    let _multicall_tx_result = multi_call_handler.submit().await?;
+    // println!("Multicall tx result: {:?}", multicall_tx_result);
+
+    sleep(Duration::from_secs(2)).await;
 
     let orders = market.user_orders(wallet_id).await?.value;
     println!("Number of Orders: {:?}", orders.len());

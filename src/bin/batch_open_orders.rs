@@ -50,6 +50,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id = AssetId::from_str(&usdc_id)?;
     let usdc_amount = format_value_with_decimals(3_000, 6);
 
+    let account = market.account(wallet_id.clone()).await?.value;
+    println!(
+        "market account before deposit and order creation: {:?}",
+        account
+    );
+
     let mut multi_call_handler: CallHandler<
         WalletUnlocked,
         Vec<fuels::programs::calls::ContractCall>,
@@ -122,6 +128,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let orders = market.user_orders(wallet_id).await?.value;
     println!("Number of Orders: {:?}", orders.len());
+
+    let account = market.account(wallet_id.clone()).await?.value;
+    println!(
+        "market account after deposit and order creation: {:?}",
+        account
+    );
 
     Ok(())
 }
