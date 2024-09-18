@@ -89,19 +89,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("BTC account after: {:?}", btc_account_after);
 
     // this works when not in a multicall:
-    /*
-    let _tx0 = btc_market
-            .withdraw(base_withdraw_amount, AssetType::Base)
-            .await;
-        let _tx1 = btc_market
-            .withdraw(quote_withdraw_amount, AssetType::Quote)
-            .await;
 
-        // Retrieve account balances in BTC/USDC market after multi-call
-        let btc_account_after = btc_market.account(wallet_id.clone()).await?.value;
-        println!(
-            "BTC account non multicall withdraw: {:?}",
-            btc_account_after
-        ); */
+    let _tx0 = btc_market
+        .withdraw(base_withdraw_amount, AssetType::Base)
+        .await;
+    let _tx1 = btc_market
+        .withdraw(quote_withdraw_amount, AssetType::Quote)
+        .await;
+
+    // Retrieve account balances in BTC/USDC market after multi-call
+    let btc_account_after = btc_market.account(wallet_id.clone()).await?.value;
+    println!(
+        "BTC account non multicall withdraw: {:?}",
+        btc_account_after
+    );
     Ok(())
 }
