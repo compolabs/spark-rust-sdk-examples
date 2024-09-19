@@ -3,7 +3,7 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::CallParameters,
+    prelude::{CallParameters, VariableOutputPolicy},
     programs::calls::CallHandler,
     types::transaction::TxPolicies,
     types::{AssetId, ContractId, Identity},
@@ -62,13 +62,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let orders = btc_market.user_orders(wallet_id.clone()).await?.value;
 
     // Start Multi-call: Cancel orders and withdraw from BTC market, deposit and open order in ETH market
-    let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
+    let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone())
+        .with_variable_output_policy(VariableOutputPolicy::Exactly(2));
 
     if orders.len() > 0 {
         // Cancel open orders in BTC/USDC market
         for order_id in orders.clone() {
             let cancel_order_call = btc_market.get_instance().methods().cancel_order(order_id);
-            // multi_call_handler = multi_call_handler.add_call(cancel_order_call);
+            multi_call_handler = multi_call_handler.add_call(cancel_order_call);
         }
     }
 
@@ -80,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .methods()
             .withdraw(base_withdraw_amount, AssetType::Base);
 
-        // multi_call_handler = multi_call_handler.add_call(withdraw_base_call);
+        multi_call_handler = multi_call_handler.add_call(withdraw_base_call);
     }
 
     // Withdraw quote asset (e.g., USDC) if balance is greater than zero
@@ -93,17 +94,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         multi_call_handler = multi_call_handler.add_call(withdraw_quote_call);
     }
 
-    // Execute the multi-call
-    let multicall_tx_result = multi_call_handler.submit().await?;
-
-    let tx_id = multicall_tx_result.tx_id(); // Save the tx_id before moving `multicall_tx_result`
-    println!("multicall transaction id: 0x{:?}", tx_id);
-
-    // Execute the multi-call and consume `multicall_tx_result`
-    let amount: u64 = multicall_tx_result.response().await?.value;
-
-    println!("amount: {:?}", amount);
-
     // Depositing USDC to ETH/USDC market
     let usdc_asset_id = AssetId::from_str(&usdc_id)?;
     let deposit_usdc_call_params =
@@ -115,11 +105,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .call_params(deposit_usdc_call_params)
         .unwrap();
 
-    // multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
+    multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
 
-    // println!("is ok: {:?}", multicall_tx_result);
-    // Output the result of the multi-call
-    // println!("Multicall result: {:?}", multicall_tx_result);
+    // Execute the multi-call
+    let multicall_tx_result = multi_call_handler.submit().await?;
+
+    let tx_id = multicall_tx_result.tx_id(); // Save the tx_id before moving `multicall_tx_result`
+    println!("multicall transaction id: 0x{:?}", tx_id);
 
     // Retrieve account balances in BTC/USDC market after multi-call
     let btc_account_after = btc_market.account(wallet_id.clone()).await?.value;

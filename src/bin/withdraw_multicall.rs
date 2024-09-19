@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Start Multi-call: Cancel orders and withdraw from BTC market, deposit and open order in ETH market
     let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone())
-        .with_variable_output_policy(VariableOutputPolicy::Exactly(1));
+        .with_variable_output_policy(VariableOutputPolicy::Exactly(2));
 
     // Withdraw base asset (e.g., BTC) if balance is greater than zero
     if base_withdraw_amount > 0 {
@@ -86,22 +86,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Retrieve account balances in BTC/USDC market after multi-call
     let btc_account_after = btc_market.account(wallet_id.clone()).await?.value;
-    println!("BTC account after: {:?}", btc_account_after);
-
-    // this works when not in a multicall:
-
-    let _tx0 = btc_market
-        .withdraw(base_withdraw_amount, AssetType::Base)
-        .await;
-    let _tx1 = btc_market
-        .withdraw(quote_withdraw_amount, AssetType::Quote)
-        .await;
+    println!("call 1: {:?}", btc_account_after);
 
     // Retrieve account balances in BTC/USDC market after multi-call
     let btc_account_after = btc_market.account(wallet_id.clone()).await?.value;
-    println!(
-        "BTC account non multicall withdraw: {:?}",
-        btc_account_after
-    );
+    println!("call 2: {:?}", btc_account_after);
     Ok(())
 }
