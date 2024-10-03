@@ -1,17 +1,17 @@
 [package]
 name = "spark-rust-sdk-examples"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["alexey <alexnagornnyy.an@gmail.com>", "partylikeits1983 <aleqvids@gmail.com>"]
 license = "Apache-2.0"
 
 [dependencies]
-fuels = { version = "0.66.4", features = ["fuel-core-lib"] }
+fuels = { version = "0.66.5", features = ["fuel-core-lib"] }
 tokio = { version = "1.12", features = ["rt", "macros"] }
-spark-market-sdk = { version = "0.4.0" }
-spark-registry-sdk = { version = "0.4.0" }
+spark-market-sdk = { version = "0.5.1" }
+spark-registry-sdk = { version = "0.5.0" }
 
 anyhow = "1.0.86"
 dotenv = "0.15.0"
-serde = "1.0.204"
+serde = "1.0.210"
 rand = "0.8.5"

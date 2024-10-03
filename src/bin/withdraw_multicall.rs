@@ -3,10 +3,9 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::{CallParameters, VariableOutputPolicy},
+    prelude::VariableOutputPolicy,
     programs::calls::CallHandler,
-    types::transaction::TxPolicies,
-    types::{AssetId, ContractId, Identity},
+    types::{ContractId, Identity},
 };
 
 use spark_market_sdk::{AssetType, SparkMarketContract};
@@ -26,12 +25,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
     let btc_usdc_contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
-
-    let btc_id: String = env::var("BTC_ID")?;
-    let btc_id = AssetId::from_str(&btc_id)?;
-
-    let usdc_id: String = env::var("USDC_ID")?;
-    let usdc_id = AssetId::from_str(&usdc_id)?;
 
     // Connect to provider
     let provider = Provider::connect("testnet.fuel.network").await?;
