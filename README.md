@@ -7,7 +7,14 @@ On using fuel's multicall functionality it is possible to open and close multipl
 
 ## Deployment Addresses
 
-For latest deployment addresses refer to the orderbook releases page: https://github.com/compolabs/orderbook-contract/releases
+Spark Registry
+0x194987ad2314d2de50646078ac1841f00b2dffda863a7d3dd421d220eb83d019
+
+BTC/USDC Spark Market
+0x7b88385ae73dd3ccc62012e7a52cddd05c7e82ad54a5df721dfa0c1f8b5998f0
+
+ETH/USDC Spark Market
+0xc18094a283193c9b4726d2f644ed07ec9806bbe60a0688d45bffb26c379c1428
 
 ## Default Fees
 
