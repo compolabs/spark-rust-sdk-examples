@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Creating Buy / Sell Limit Orders
 
     // Buying 0.1 BTC
-    let buy_amount = 10_000_000; // 0.1 BTC
+    let buy_amount = 10_000_0; // 0.001 BTC
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
