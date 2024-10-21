@@ -48,7 +48,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wallet_id: Identity = main_wallet.address().into();
     println!("wallet {:?}", main_wallet.address().to_string());
 
+    // Initialize iteration counter
+    let mut iteration = 0;
+
     loop {
+        iteration += 1;
+        println!("\nStarting iteration {}", iteration);
+
         // Depositing Assets
         let btc_id = AssetId::from_str(&btc_id_str)?;
         let btc_amount = format_value_with_decimals(1.0, 6);
@@ -58,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let account = market.account(wallet_id.clone()).await?.value;
         println!(
-            "market account before deposit and order creation: {:?}",
+            "Market account before deposit and order creation: {:?}",
             account
         );
 
@@ -86,19 +92,32 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let deposit_tx_result = deposit_multi_call_handler.submit().await?;
         let deposit_tx_id = deposit_tx_result.tx_id();
-        println!("deposit transaction id: 0x{:?}", deposit_tx_id);
+        println!("Deposit transaction id: 0x{:?}", deposit_tx_id);
 
         sleep(Duration::from_secs(1)).await;
 
         let protocol_fee = market.protocol_fee().await?.value;
-        println!("protocol_fee: {:?}", protocol_fee);
+        println!("Protocol fee: {:?}", protocol_fee);
 
         // Get the current price of Bitcoin from an API
         let url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd";
         let response = reqwest::get(url).await?.json::<serde_json::Value>().await?;
-        let current_price: f64 = response["bitcoin"]["usd"].as_f64().unwrap();
+        let mut current_price: f64 = response["bitcoin"]["usd"].as_f64().unwrap();
 
-        println!("Current BTC price: ${:.2}", current_price);
+        // Adjust the price based on iteration
+        if iteration % 2 == 1 {
+            // Odd iteration: reduce price by 2%
+            current_price *= 0.98;
+            println!(
+                "Adjusted BTC price for iteration {}: ${:.2}",
+                iteration, current_price
+            );
+        } else {
+            println!(
+                "Current BTC price for iteration {}: ${:.2}",
+                iteration, current_price
+            );
+        }
 
         // Define the price range
         let price_range = 5000.0;
@@ -172,7 +191,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // Submit the multicall
                     let multicall_tx_result = multi_call_handler.submit().await?;
                     let tx_id = multicall_tx_result.tx_id();
-                    println!("multicall transaction id: 0x{:?}", tx_id);
+                    println!("Multicall transaction id: 0x{:?}", tx_id);
 
                     // Reset the multicall handler and counter
                     multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
@@ -202,7 +221,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // Submit the multicall
                     let multicall_tx_result = multi_call_handler.submit().await?;
                     let tx_id = multicall_tx_result.tx_id();
-                    println!("multicall transaction id: 0x{:?}", tx_id);
+                    println!("Multicall transaction id: 0x{:?}", tx_id);
 
                     // Reset the multicall handler and counter
                     multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
@@ -217,7 +236,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if open_order_call_count > 0 {
             let multicall_tx_result = multi_call_handler.submit().await?;
             let tx_id = multicall_tx_result.tx_id();
-            println!("multicall transaction id: 0x{:?}", tx_id);
+            println!("Multicall transaction id: 0x{:?}", tx_id);
         }
 
         sleep(Duration::from_secs(1)).await;
@@ -227,7 +246,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let account = market.account(wallet_id.clone()).await?.value;
         println!(
-            "market account after deposit and order creation: {:?}",
+            "Market account after deposit and order creation: {:?}",
             account
         );
 
