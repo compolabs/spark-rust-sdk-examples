@@ -42,23 +42,30 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let orders = market.user_orders(wallet_id).await?.value;
     println!("User Orders: {:?}", orders);
 
-    // Prepare all contract calls for cancelling orders
-    let mut multi_call_handler: CallHandler<
-        WalletUnlocked,
-        Vec<fuels::programs::calls::ContractCall>,
-        (),
-    > = CallHandler::new_multi_call(main_wallet.clone());
+    // Cancel orders in batches of 50
+    const BATCH_SIZE: usize = 100;
+    let total_orders = orders.len();
 
-    for order_id in orders.clone() {
-        let cancel_order_call = market.get_instance().methods().cancel_order(order_id);
-        multi_call_handler = multi_call_handler.add_call(cancel_order_call);
-    }
+    if total_orders > 0 {
+        for (batch_index, batch_orders) in orders.chunks(BATCH_SIZE).enumerate() {
+            // Prepare multi_call_handler for this batch
+            let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
 
-    // Execute all the prepared calls in a single transaction
-    println!("cancelling {} orders", orders.len());
-    if orders.len() > 0 {
-        let _cancel_order_multicall_tx = multi_call_handler.submit().await?;
-        println!("success");
+            for order_id in batch_orders {
+                let cancel_order_call = market.get_instance().methods().cancel_order(*order_id);
+                multi_call_handler = multi_call_handler.add_call(cancel_order_call);
+            }
+
+            println!(
+                "Cancelling batch {} with {} orders",
+                batch_index + 1,
+                batch_orders.len()
+            );
+
+            // Execute the prepared calls for this batch
+            let _cancel_order_multicall_tx = multi_call_handler.submit().await?;
+            println!("Batch {} cancelled successfully", batch_index + 1);
+        }
     } else {
         println!("No orders to cancel");
     }
