@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         // Depositing Assets
         let btc_id = AssetId::from_str(&btc_id_str)?;
-        let btc_amount = format_value_with_decimals(1.0, 6);
+        let btc_amount = format_value_with_decimals(1.0, 8);
 
         let usdc_id = AssetId::from_str(&usdc_id_str)?;
         let usdc_amount = format_value_with_decimals(3000.0, 6);
