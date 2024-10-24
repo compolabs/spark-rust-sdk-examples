@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     let btc_amount = format_value_with_decimals(1.0, 8); // Deposit 1 BTC
 
     let usdc_id = AssetId::from_str(&usdc_id).unwrap();
-    let usdc_amount = format_value_with_decimals(70_000.0, 6); // Deposit 70,000 USDC
+    let usdc_amount = format_value_with_decimals(80_000.0, 6); // Deposit 70,000 USDC
 
     println!("Depositing BTC...");
     market.deposit(btc_amount, btc_id).await?;
@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
     // Buy/Sell order amounts
     let buy_amount = format_value_with_decimals(0.1, 8); // 0.1 BTC per order
     let sell_amount = format_value_with_decimals(0.1, 8); // 0.1 BTC per order
-    let base_price = 70_000.0; // Base price in USD
+    let base_price = 75_000.0; // Base price in USD
 
     // Vectors to store order IDs
     let mut buy_order_ids = Vec::new();

@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
     // Buying 10_000 USDC worth of BTC
     let buy_amount = 10_000_000; // 0.1 BTC
     let order_type: OrderType = OrderType::Buy;
-    let price: u64 = 70_000_000_000_000_u64;
+    let price: u64 = 75_000_000_000_000_u64;
 
     println!(
         "Opening Buy Order: {} BTC at {} BTC/USDC",
@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
     // Selling 0.1 BTC for 70k USDC
     let sell_amount: u64 = btc_amount;
     let order_type = OrderType::Sell;
-    let price = 70_000_000_000_000_u64;
+    let price = 75_000_000_000_000_u64;
 
     println!(
         "Opening Sell Order: {} BTC at {} BTC/USDC",
