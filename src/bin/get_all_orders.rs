@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("User Orders: {:?}", orders.len());
 
     let account = market.account(wallet_id.clone()).await?.value;
-    println!("BTC account before: {:?}", account);
+    println!("account before: {:?}", account);
 
     Ok(())
 }
