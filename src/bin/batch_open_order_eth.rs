@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let eth_id = AssetId::from_str(&eth_id)?;
-    let eth_amount = format_value_with_decimals(1, 6);
+    let eth_amount = format_value_with_decimals(1, 9);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
     let usdc_amount = format_value_with_decimals(3_000, 6);
