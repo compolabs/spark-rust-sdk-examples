@@ -49,10 +49,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let trmp_id = AssetId::from_str(&trmp_id)?;
-    let trmp_amount = format_value_with_decimals(100, 9); // 1 TRMP with 9 decimals
+    let trmp_amount = format_value_with_decimals(500, 9); // 1 TRMP with 9 decimals
 
     let kmla_id = AssetId::from_str(&kmla_id)?;
-    let kmla_amount = format_value_with_decimals(100, 9); // 1 KMLA with 9 decimals
+    let kmla_amount = format_value_with_decimals(500, 9); // 1 KMLA with 9 decimals
 
     let account_before = market.account(wallet_id.clone()).await?.value;
     println!(
@@ -93,12 +93,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let open_order_call_params = CallParameters::default();
 
     let buy_order_type = OrderType::Buy;
-    let buy_order_amount = format_value_with_decimals(1, 9); // 100 TRMP
-    let buy_start_price = format_value_with_decimals(11, 8); // Example: 50 KMLA per TRMP
+    let buy_order_amount = format_value_with_decimals(1, 8); // 100 TRMP
+    let buy_start_price = format_value_with_decimals(550, 8); // Example: 50 KMLA per TRMP
 
     let sell_order_type = OrderType::Sell;
-    let sell_order_amount = format_value_with_decimals(1, 9); // 100 TRMP
-    let sell_start_price = format_value_with_decimals(12, 8); // Example: 51 KMLA per TRMP
+    let sell_order_amount = format_value_with_decimals(1, 8); // 100 TRMP
+    let sell_start_price = format_value_with_decimals(550, 8); // Example: 51 KMLA per TRMP
 
     let step = 500_000_000; // Adjusted for 9 decimals (e.g., 0.5 KMLA)
 
