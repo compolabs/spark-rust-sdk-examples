@@ -37,7 +37,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id_str: String = env::var("USDC_ID")?;
 
     // Connect to provider
-    let provider = Provider::connect("testnet.fuel.network").await?;
+    let provider_url = env::var("PROVIDER")?;
+    let provider = Provider::connect(provider_url).await?;
 
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
@@ -149,9 +150,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // Normalize the weights to determine order sizes
         let total_available_btc = 0.15; // Total BTC to allocate for sell orders
         let total_available_usdc = 10000.0; // Total USDC to allocate for buy orders
-
-        let btc_decimals = 8;
-        let usdc_decimals = 6;
 
         // Initialize the multicall handler and counter
         let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());

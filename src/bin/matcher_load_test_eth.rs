@@ -36,7 +36,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id_str: String = env::var("USDC_ID")?;
 
     // Connect to provider
-    let provider = Provider::connect("testnet.fuel.network").await?;
+    let provider_url = env::var("PROVIDER")?;
+    let provider = Provider::connect(provider_url).await?;
 
     let main_wallet =
         WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
