@@ -171,7 +171,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 continue;
             }
 
-            // Create Sell Orders (selling BTC for USDC)
+            /*             // Create Sell Orders (selling BTC for USDC)
             if sell_order_amount_btc >= 0.0001 {
                 let sell_order_amount = format_value_with_decimals(sell_order_amount_btc, 11);
                 let sell_price_scaled = format_value_with_decimals(price, 9);
@@ -198,7 +198,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     sleep(Duration::from_secs(1)).await;
                 }
-            }
+            } */
 
             // Create Buy Orders (buying BTC with USDC)
             if buy_order_amount_usdc >= 1.0 {

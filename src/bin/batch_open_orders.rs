@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let step = 500;
 
     // Creating Buy / Sell Limit Orders in a single transaction
-    for i in 0..5 {
+    for i in 0..8 {
         let buy_open_price = (buy_start_price + i * step) * 1_000_000_000_u64;
         let sell_open_price = (sell_start_price + i * step) * 1_000_000_000_u64;
 
