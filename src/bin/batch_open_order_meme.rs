@@ -94,16 +94,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let buy_order_type = OrderType::Buy;
     let buy_order_amount = format_value_with_decimals(1, 9); // 100 TRMP
-    let buy_start_price = format_value_with_decimals(10, 8); // Example: 50 KMLA per TRMP
+    let buy_start_price = format_value_with_decimals(11, 8); // Example: 50 KMLA per TRMP
 
     let sell_order_type = OrderType::Sell;
     let sell_order_amount = format_value_with_decimals(1, 9); // 100 TRMP
-    let sell_start_price = format_value_with_decimals(11, 8); // Example: 51 KMLA per TRMP
+    let sell_start_price = format_value_with_decimals(12, 8); // Example: 51 KMLA per TRMP
 
     let step = 500_000_000; // Adjusted for 9 decimals (e.g., 0.5 KMLA)
 
     // Creating Buy / Sell Limit Orders in a single transaction
-    for i in 0..2 {
+    for i in 0..10 {
         let buy_open_price = buy_start_price + i * step;
         let sell_open_price = sell_start_price + i * step;
 
