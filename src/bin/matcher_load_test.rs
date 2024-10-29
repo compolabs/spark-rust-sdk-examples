@@ -174,8 +174,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Create Sell Orders (selling BTC for USDC)
             if sell_order_amount_btc >= 0.0001 {
                 let sell_order_amount =
-                    format_value_with_decimals(sell_order_amount_btc, btc_decimals);
-                let sell_price_scaled = format_value_with_decimals(price, usdc_decimals);
+                    format_value_with_decimals(sell_order_amount_btc, 8);
+                let sell_price_scaled = format_value_with_decimals(price, 9);
 
                 let sell_open_order_call = market
                     .get_instance()
@@ -204,8 +204,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Create Buy Orders (buying BTC with USDC)
             if buy_order_amount_usdc >= 1.0 {
                 let buy_order_amount =
-                    format_value_with_decimals(buy_order_amount_usdc, usdc_decimals);
-                let buy_price_scaled = format_value_with_decimals(price, usdc_decimals);
+                    format_value_with_decimals(buy_order_amount_usdc, 7);
+                let buy_price_scaled = format_value_with_decimals(price, 9);
 
                 let buy_open_order_call = market
                     .get_instance()
