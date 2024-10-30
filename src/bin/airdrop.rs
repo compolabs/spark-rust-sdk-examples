@@ -3,6 +3,7 @@ use std::env;
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked, Account},
+    crypto::SecretKey,
     types::{bech32::Bech32Address, transaction::TxPolicies, Address},
 };
 use std::str::FromStr;
@@ -10,19 +11,21 @@ use std::str::FromStr;
 use std::error::Error;
 
 const ASSET_ID: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const AMOUNT: u64 = 100;
+const AMOUNT: u64 = 1;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
     // Environment variables
-    let mnemonic = env::var("MNEMONIC")?;
+    let private_key = env::var("PRIVATE_KEY")?;
     let provider = Provider::connect("testnet.fuel.network").await?;
 
-    let main_wallet =
-        WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
-
+    let main_wallet = WalletUnlocked::new_from_private_key(
+        SecretKey::from_str(&private_key).unwrap(),
+        Some(provider.clone()),
+    );
+    println!("Main wallet: {:?}", main_wallet.address());
     let addresses = read_addresses_from_file("addresses")?;
 
     println!(
