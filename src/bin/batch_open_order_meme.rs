@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let step = 500_000_000; // Adjusted for 9 decimals (e.g., 0.5 KMLA)
 
     // Creating Buy / Sell Limit Orders in a single transaction
-    for i in 0..10 {
+    for i in 0..20 {
         let buy_open_price = buy_start_price + i * step;
         let sell_open_price = sell_start_price + i * step;
 
