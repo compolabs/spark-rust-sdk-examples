@@ -49,10 +49,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let trmp_id = AssetId::from_str(&trmp_id)?;
-    let trmp_amount = format_value_with_decimals(100, 9); // 1 TRMP with 9 decimals
+    let trmp_amount = format_value_with_decimals(1000, 9); // 1 TRMP with 9 decimals
 
     let kmla_id = AssetId::from_str(&kmla_id)?;
-    let kmla_amount = format_value_with_decimals(100, 9); // 1 KMLA with 9 decimals
+    let kmla_amount = format_value_with_decimals(1000, 9); // 1 KMLA with 9 decimals
 
     let account_before = market.account(wallet_id.clone()).await?.value;
     println!(
