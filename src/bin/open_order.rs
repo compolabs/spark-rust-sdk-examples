@@ -90,8 +90,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Creating Buy / Sell Limit Orders
 
-    // Buying 0.1 BTC
-    let buy_amount = 10_000_000; // 0.1 BTC
+    // Buying 0.00082881 BTC
+    let buy_amount = 82881;
     let order_type: OrderType = OrderType::Buy;
     let price: u64 = 70_000_000_000_000_u64;
 
@@ -112,8 +112,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     .unwrap();
 
-    // Selling 0.1 BTC for 70k USDC
-    let sell_amount: u64 = buy_amount;
+    // Selling BTC for 70k USDC
+    let sell_amount: u64 = 82881;
     let order_type = OrderType::Sell;
     let price = 70_000_000_000_000_u64;
 
@@ -135,7 +135,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .unwrap();
 
     let orders = market.user_orders(wallet_id).await?.value;
-    println!("orders {:?}", orders.len());
+    println!("orders {:?}", orders);
 
     let account = market.account(wallet_id).await.unwrap().value;
     println!("account: {:?}", account);
