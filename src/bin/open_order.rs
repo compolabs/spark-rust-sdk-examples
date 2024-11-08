@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
-    let contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
+    let contract_id = env::var("ETH_USDC_CONTRACT_ID")?;
 
     // Connect to provider
     let provider_url = env::var("PROVIDER")?;
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wallet_id: Identity = main_wallet.address().into();
     println!("wallet {:?}", main_wallet.address().to_string());
 
-    let btc_id: String = env::var("BTC_ID")?;
+    let eth_id: String = env::var("ETH_ID")?;
     let usdc_id: String = env::var("USDC_ID")?;
 
     // Getting asset balances
@@ -47,20 +47,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("account: {:?}", account);
 
     // Depositing Assets
-    let btc_id = AssetId::from_str(&btc_id)?;
-    let btc_amount = format_value_with_decimals(1, 8);
+    let eth_id = AssetId::from_str(&eth_id)?;
+    let eth_amount = format_value_with_decimals(1, 7);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
-    let usdc_amount = format_value_with_decimals(10_000, 6);
+    let usdc_amount = format_value_with_decimals(50, 6);
 
-    let btc_bal = main_wallet.get_asset_balance(&btc_id).await?;
+    let eth_bal = main_wallet.get_asset_balance(&eth_id).await?;
     let usd_bal = main_wallet.get_asset_balance(&usdc_id).await?;
 
-    println!("btc balance: {:?}", btc_bal);
+    println!("eth balance: {:?}", eth_bal);
     println!("usdc balance: {:?}", usd_bal);
 
-    println!("Depositing BTC");
-    match market.deposit(btc_amount, btc_id).await {
+    println!("Depositing eth");
+    match market.deposit(eth_amount, eth_id).await {
         Ok(_) => {
             println!("Deposit Success");
             Ok(())
@@ -90,14 +90,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Creating Buy / Sell Limit Orders
 
-    // Buying 0.00082881 BTC
-    let buy_amount = 82881;
+    // Buying 0.001 ETH
+    let buy_amount = 1000000;
     let order_type: OrderType = OrderType::Buy;
-    let price: u64 = 70_000_000_000_000_u64;
+    let price: u64 = 3_001_000_000_000_u64;
 
     println!(
-        "Opening Buy Order: {} BTC at {} BTC/USDC",
-        format_to_readable_value(buy_amount, 8),
+        "Opening Buy Order: {} ETH at {} ETH/USDC",
+        format_to_readable_value(buy_amount, 9),
         format_to_readable_value(price, 9)
     );
     match market.open_order(buy_amount, order_type, price).await {
@@ -112,14 +112,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     .unwrap();
 
-    // Selling BTC for 70k USDC
-    let sell_amount: u64 = 82881;
+    // Selling 0.001 ETH for 3002 USDC
+    let sell_amount: u64 = 1000000;
     let order_type = OrderType::Sell;
-    let price = 70_000_000_000_000_u64;
+    let price = 3_002_000_000_000_u64;
 
     println!(
-        "Opening Sell Order: {} BTC at {} BTC/USDC",
-        format_to_readable_value(sell_amount, 8),
+        "Opening Sell Order: {} ETH at {} ETH/USDC",
+        format_to_readable_value(sell_amount, 9),
         format_to_readable_value(price, 9)
     );
     match market.open_order(sell_amount, order_type, price).await {
