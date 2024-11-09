@@ -4,12 +4,15 @@ version = "0.4.4"
 edition = "2021"
 authors = ["ComposabilityLabs"]
 license = "Apache-2.0"
+rust-version = "1.82"
 
 [dependencies]
-fuels = { version = "0.66.9", features = ["fuel-core-lib"] }
+fuels = { version = "0.66.9" }
+# fuel-core = "0.40.0"
+
 tokio = { version = "1.12", features = ["rt", "macros"] }
-spark-market-sdk = { version = "0.6.3" }
-spark-registry-sdk = { version = "0.6.3" }
+spark-market-sdk = { version = "0.6.5" }
+spark-registry-sdk = { version = "0.6.4" }
 
 anyhow = "1.0.89"
 dotenv = "0.15.0"

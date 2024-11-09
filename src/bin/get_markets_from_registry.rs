@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     // Parse asset IDs and construct asset pairs
     let btc_usdc = (parse_asset_id(&wbtc_id)?, parse_asset_id(&usdc_id)?);
     let eth_usdc = (parse_asset_id(&eth_id)?, parse_asset_id(&usdc_id)?);
-    let assets = vec![btc_usdc, eth_usdc];
+    let assets = vec![eth_usdc];
 
     // Retrieve market ID from registry
     let registered_markets = registry.markets(assets.clone()).await?.value;

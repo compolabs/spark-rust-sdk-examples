@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 
     // Environment variables
     let mnemonic = env::var("MNEMONIC")?;
-    let contract_id = env::var("BTC_USDC_CONTRACT_ID")?;
+    let contract_id = env::var("ETH_USDC_CONTRACT_ID")?;
 
     // Connect to provider
     let provider_url = env::var("PROVIDER")?;
