@@ -59,21 +59,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     > = CallHandler::new_multi_call(main_wallet.clone());
 
     // Deposit Calls
-    let deposit_btc_call_params = CallParameters::new(eth_amount, eth_id, 20_000_000);
-    let deposit_btc_call = market
-        .get_instance()
-        .methods()
-        .deposit()
-        .call_params(deposit_btc_call_params)
-        .unwrap();
-
-    let deposit_usdc_call_params = CallParameters::new(usdc_amount, usdc_id, 20_000_000);
-    let deposit_usdc_call = market
-        .get_instance()
-        .methods()
-        .deposit()
-        .call_params(deposit_usdc_call_params)
-        .unwrap();
+    let deposit_btc_call = market.deposit_call_handler(eth_amount, eth_id).await;
+    let deposit_usdc_call = market.deposit_call_handler(usdc_amount, usdc_id).await;
 
     multi_call_handler = multi_call_handler.add_call(deposit_btc_call);
     multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
@@ -84,8 +71,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("protocol_fee: {:?}", protocol_fee);
 
     // let matcher_fee = market.matcher_fee().await?.value as u64;
-    let open_order_call_params = CallParameters::default();
-
     let buy_order_type = OrderType::Buy;
     let buy_order_amount = 500_000; // 0.005 ETH
     let buy_start_price = 2_000u64;
@@ -98,18 +83,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let sell_open_price = (sell_start_price + i * step) * 1_000_000_000_u64;
 
         let buy_open_order_call = market
-            .get_instance()
-            .methods()
-            .open_order(buy_order_amount, buy_order_type.clone(), buy_open_price)
-            .call_params(open_order_call_params.clone())
-            .unwrap();
+            .open_order_call_handler(buy_order_amount, buy_order_type.clone(), buy_open_price)
+            .await;
 
         let sell_open_order_call = market
-            .get_instance()
-            .methods()
-            .open_order(sell_order_amount, OrderType::Sell, sell_open_price)
-            .call_params(open_order_call_params.clone())
-            .unwrap();
+            .open_order_call_handler(sell_order_amount, OrderType::Sell, sell_open_price)
+            .await;
 
         multi_call_handler = multi_call_handler.add_call(buy_open_order_call);
         multi_call_handler = multi_call_handler.add_call(sell_open_order_call);
