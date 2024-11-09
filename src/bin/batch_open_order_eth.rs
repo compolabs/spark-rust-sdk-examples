@@ -3,7 +3,6 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::CallParameters,
     programs::calls::CallHandler,
     types::{AssetId, ContractId, Identity},
 };
