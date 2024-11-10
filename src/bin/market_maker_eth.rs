@@ -4,8 +4,7 @@ use std::{env, error::Error, str::FromStr};
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
     prelude::CallParameters,
-    programs::calls::CallHandler,
-    types::{AssetId, ContractId, Identity},
+    types::{AssetId, Bits256, ContractId, Identity},
 };
 
 use spark_market_sdk::{OrderType, SparkMarketContract};
@@ -18,6 +17,11 @@ pub fn format_value_with_decimals(value: f64, decimals: u32) -> u64 {
 
 pub fn format_to_readable_value(value: u64, decimals: u32) -> f64 {
     value as f64 / 10u64.pow(decimals) as f64
+}
+
+// Helper function to convert Bits256 to hex string
+fn hex_str_from_bits256(bits: &Bits256) -> String {
+    format!("0x{}", hex::encode(bits.0))
 }
 
 #[tokio::main]
@@ -43,6 +47,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wallet_id: Identity = main_wallet.address().into();
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
+    // Define the total value of orders to open
+    let total_order_value_usd = 20.0; // Total value in USD
+
     // Start of single execution block
     {
         println!("\nStarting new iteration...");
@@ -53,9 +60,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let current_price: f64 = response["ethereum"]["usd"].as_f64().unwrap();
         println!("Current ETH price: ${:.2}", current_price);
 
-        // Define the ±2% price range
-        let lower_bound = current_price * 0.98;
-        let upper_bound = current_price * 1.02;
+        // Define the ±1% price range
+        let lower_bound = current_price * 0.99;
+        let upper_bound = current_price * 1.01;
         println!(
             "Order price range: ${:.2} - ${:.2}",
             lower_bound, upper_bound
@@ -84,29 +91,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         println!("Number of orders to cancel: {}", orders_to_cancel.len());
 
-        // Batch cancel orders in batches of 20
-        const BATCH_SIZE: usize = 20;
+        // Cancel orders individually
         let total_cancel_orders = orders_to_cancel.len();
 
         if total_cancel_orders > 0 {
-            for (batch_index, batch_orders) in orders_to_cancel.chunks(BATCH_SIZE).enumerate() {
-                // Prepare multi_call_handler for this batch
-                let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
-
-                for order_id in batch_orders {
-                    let cancel_order_call = market.get_instance().methods().cancel_order(*order_id);
-                    multi_call_handler = multi_call_handler.add_call(cancel_order_call);
+            for order_id in orders_to_cancel {
+                let order_id_hex = hex_str_from_bits256(&order_id);
+                println!("Cancelling order {}", order_id_hex);
+                match market.cancel_order(order_id).await {
+                    Ok(_) => println!("Order {} cancelled successfully", order_id_hex),
+                    Err(e) => println!("Error cancelling order {}: {:?}", order_id_hex, e),
                 }
-
-                println!(
-                    "Cancelling batch {} with {} orders",
-                    batch_index + 1,
-                    batch_orders.len()
-                );
-
-                // Execute the prepared calls for this batch
-                let _cancel_order_multicall_tx = multi_call_handler.submit().await?;
-                println!("Batch {} cancelled successfully", batch_index + 1);
+                sleep(Duration::from_millis(500)).await; // Slight delay between cancellations
             }
         } else {
             println!("No orders to cancel");
@@ -130,12 +126,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Market ETH balance: {}", eth_balance);
         println!("Market USDC balance: {}", usdc_balance);
 
-        // Define the desired order size in USD
-        let desired_order_size_usd = 1.0; // $1 per order
+        // Define the number of price levels
+        let num_levels = 5; // Number of price levels within the ±2% range
+
+        // Calculate desired order size per order
+        let desired_order_size_usd = total_order_value_usd / (num_levels as f64 * 2.0); // Since we have buy and sell orders at each level
+
+        println!(
+            "Desired order size per order: ${:.2}",
+            desired_order_size_usd
+        );
 
         // Generate price levels within the ±2% range
-        let price_step = (upper_bound - lower_bound) / 4.0; // Divide the range into 5 steps
-        let num_levels = 5; // Maximum of 5 price levels
+        let price_step = (upper_bound - lower_bound) / (num_levels as f64 - 1.0); // Adjusted for num_levels
         let mut price_levels = Vec::with_capacity(num_levels);
 
         for i in 0..num_levels {
@@ -143,20 +146,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             price_levels.push(price);
         }
 
-        // Limit the number of new orders to 5
-        let max_new_orders = num_levels;
-
         // Calculate total required balances for new orders
         let mut total_required_eth = 0.0;
         let mut total_required_usdc = 0.0;
 
         // Store calculated order amounts for use in order placement
-        let mut sell_order_amounts_eth = Vec::with_capacity(max_new_orders);
-        let mut sell_prices_scaled = Vec::with_capacity(max_new_orders);
-        let mut buy_order_amounts_eth = Vec::with_capacity(max_new_orders);
-        let mut buy_prices_scaled = Vec::with_capacity(max_new_orders);
+        let mut sell_order_amounts_eth = Vec::with_capacity(num_levels);
+        let mut sell_prices_scaled = Vec::with_capacity(num_levels);
+        let mut buy_order_amounts_eth = Vec::with_capacity(num_levels);
+        let mut buy_prices_scaled = Vec::with_capacity(num_levels);
 
-        for (i, price) in price_levels.iter().enumerate() {
+        for price in &price_levels {
             // Adjust buy and sell prices with a small spread if needed
             let spread = 0.001; // 0.1% spread
             let half_spread = spread / 2.0; // 0.05%
@@ -171,15 +171,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let buy_price_scaled = format_value_with_decimals(buy_price, 9); // Price is in base 1e9
             buy_prices_scaled.push(buy_price_scaled);
 
-            // Calculate sell order amount (amount of ETH equivalent to $1 at sell price)
+            // Calculate sell order amount (amount of ETH equivalent to desired_order_size_usd at sell price)
             let sell_order_amount_eth = desired_order_size_usd / sell_price;
             sell_order_amounts_eth.push(sell_order_amount_eth);
             total_required_eth += sell_order_amount_eth;
 
-            // Calculate buy order amount (amount of ETH equivalent to $1 at buy price)
+            // Calculate buy order amount (amount of ETH equivalent to desired_order_size_usd at buy price)
             let buy_order_amount_eth = desired_order_size_usd / buy_price;
             buy_order_amounts_eth.push(buy_order_amount_eth);
-            total_required_usdc += desired_order_size_usd; // Each buy order requires $1 USDC
+            total_required_usdc += desired_order_size_usd; // Each buy order requires desired_order_size_usd USDC
         }
 
         println!(
@@ -251,14 +251,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         sleep(Duration::from_secs(1)).await;
 
-        // Initialize multicall handlers and counters for buy and sell orders
-        let mut sell_multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
-        let mut buy_multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
-        let mut sell_order_call_count = 0;
-        let mut buy_order_call_count = 0;
-        let max_open_orders_per_call = 5; // Limit to 5 orders per multicall
-
-        for i in 0..max_new_orders {
+        // Open orders individually
+        for i in 0..num_levels {
             let sell_order_amount_eth = sell_order_amounts_eth[i];
             let sell_order_amount_scaled =
                 format_value_with_decimals(sell_order_amount_eth, eth_decimals);
@@ -273,88 +267,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Create Sell Orders (selling ETH for USDC)
             if sell_order_amount_eth >= 0.00001 {
                 println!(
-                    "Open order params:\nSell Order Amount: {:?}\nPrice: {:?}",
+                    "Opening sell order:\nAmount: {:?}\nPrice: {:?}",
                     sell_order_amount_scaled, sell_price_scaled
                 );
-                let sell_open_order_call = market
-                    .get_instance()
-                    .methods()
+
+                match market
                     .open_order(sell_order_amount_scaled, OrderType::Sell, sell_price_scaled)
-                    .call_params(CallParameters::default())
-                    .unwrap();
-
-                sell_multi_call_handler = sell_multi_call_handler.add_call(sell_open_order_call);
-                sell_order_call_count += 1;
-
-                if sell_order_call_count >= max_open_orders_per_call {
-                    // Submit the multicall for sell orders
-                    let multicall_tx_result = sell_multi_call_handler.submit().await?;
-                    let tx_id = multicall_tx_result.tx_id();
-                    println!(
-                        "Submitted {} sell orders. Transaction id: 0x{:?}",
-                        sell_order_call_count, tx_id
-                    );
-
-                    // Reset the multicall handler and counter for sell orders
-                    sell_multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
-                    sell_order_call_count = 0;
-
-                    sleep(Duration::from_secs(1)).await;
+                    .await
+                {
+                    Ok(_) => println!("Sell order opened successfully"),
+                    Err(e) => println!("Error opening sell order: {:?}", e),
                 }
+
+                sleep(Duration::from_secs(1)).await; // Wait between orders
             }
 
             // Create Buy Orders (buying ETH with USDC)
             if buy_order_amount_eth >= 0.00001 {
                 println!(
-                    "Open order params:\nBuy Order Amount: {:?}\nPrice: {:?}",
+                    "Opening buy order:\nAmount: {:?}\nPrice: {:?}",
                     buy_order_amount_scaled, buy_price_scaled
                 );
-                let buy_open_order_call = market
-                    .get_instance()
-                    .methods()
+
+                match market
                     .open_order(buy_order_amount_scaled, OrderType::Buy, buy_price_scaled)
-                    .call_params(CallParameters::default())
-                    .unwrap();
-
-                buy_multi_call_handler = buy_multi_call_handler.add_call(buy_open_order_call);
-                buy_order_call_count += 1;
-
-                if buy_order_call_count >= max_open_orders_per_call {
-                    // Submit the multicall for buy orders
-                    let multicall_tx_result = buy_multi_call_handler.submit().await?;
-                    let tx_id = multicall_tx_result.tx_id();
-                    println!(
-                        "Submitted {} buy orders. Transaction id: 0x{:?}",
-                        buy_order_call_count, tx_id
-                    );
-
-                    // Reset the multicall handler and counter for buy orders
-                    buy_multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
-                    buy_order_call_count = 0;
-
-                    sleep(Duration::from_secs(1)).await;
+                    .await
+                {
+                    Ok(_) => println!("Buy order opened successfully"),
+                    Err(e) => println!("Error opening buy order: {:?}", e),
                 }
+
+                sleep(Duration::from_secs(1)).await; // Wait between orders
             }
-        }
-
-        // Submit any remaining sell order calls
-        if sell_order_call_count > 0 {
-            let multicall_tx_result = sell_multi_call_handler.submit().await?;
-            let tx_id = multicall_tx_result.tx_id();
-            println!(
-                "Submitted {} sell orders. Transaction id: 0x{:?}",
-                sell_order_call_count, tx_id
-            );
-        }
-
-        // Submit any remaining buy order calls
-        if buy_order_call_count > 0 {
-            let multicall_tx_result = buy_multi_call_handler.submit().await?;
-            let tx_id = multicall_tx_result.tx_id();
-            println!(
-                "Submitted {} buy orders. Transaction id: 0x{:?}",
-                buy_order_call_count, tx_id
-            );
         }
 
         sleep(Duration::from_secs(1)).await;

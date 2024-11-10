@@ -3,16 +3,14 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::{CallParameters, abigen},
+    prelude::{abigen, CallParameters},
     programs::calls::CallHandler,
     types::{AssetId, ContractId, Identity},
 };
 
-
 use spark_market_sdk::{AssetType, OrderType, SparkMarketContract};
 
 use tokio::time::{sleep, Duration};
-
 
 pub fn format_value_with_decimals(value: u64, decimals: u32) -> u64 {
     value * 10u64.pow(decimals)
@@ -133,7 +131,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .get_instance()
             .methods()
             .open_order(buy_order_amount, buy_order_type.clone(), buy_open_price)
-           
             .call_params(open_order_call_params.clone())
             .unwrap();
 
@@ -141,7 +138,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .get_instance()
             .methods()
             .open_order(sell_order_amount, OrderType::Sell, sell_open_price)
-        
             .call_params(open_order_call_params.clone())
             .unwrap();
 
@@ -155,9 +151,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "Submitted open orders in a multicall transaction: 0x{:?}",
         multicall_tx_result.tx_id().to_string()
     );
-
-    // let log = response.decode_logs_with_type::<OpenOrderEvent>().unwrap();
-    
 
     sleep(Duration::from_secs(5)).await;
 
