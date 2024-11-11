@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
     // Define the total value of orders to open
-    let total_order_value_usd = 60.0; // Total value in USD
+    let total_order_value_usd = 100.0; // Total value in USD
 
     // Start of single execution block
     {
@@ -59,9 +59,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let current_price: f64 = response["ethereum"]["usd"].as_f64().unwrap();
         println!("Current ETH price: ${:.2}", current_price);
 
-        // Define the ±1% price range
-        let lower_bound = current_price * 0.99;
-        let upper_bound = current_price * 1.01;
+        // Define the ±1.5% price range
+        let lower_bound = current_price * 0.985; // 1 - 0.015
+        let upper_bound = current_price * 1.015; // 1 + 0.015
         println!(
             "Order price range: ${:.2} - ${:.2}",
             lower_bound, upper_bound
@@ -82,7 +82,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let order_price_scaled = order_details.price;
             let order_price = format_to_readable_value(order_price_scaled, 9); // Price is in base 1e9
 
-            // Check if the order price is outside the ±2% range
+            // Check if the order price is outside the ±1.5% range
             if order_price < lower_bound || order_price > upper_bound {
                 orders_to_cancel.push(*order);
             }
@@ -126,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Market USDC balance: {}", usdc_balance);
 
         // Define the number of price levels
-        let num_levels = 5; // Number of price levels within the ±2% range
+        let num_levels = 5; // Number of price levels within the ±1.5% range
 
         // Calculate desired order size per order
         let desired_order_size_usd = total_order_value_usd / (num_levels as f64 * 2.0); // Since we have buy and sell orders at each level
@@ -136,7 +136,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             desired_order_size_usd
         );
 
-        // Generate price levels within the ±2% range
+        // Generate price levels within the ±1.5% range
         let price_step = (upper_bound - lower_bound) / (num_levels as f64 - 1.0); // Adjusted for num_levels
         let mut price_levels = Vec::with_capacity(num_levels);
 
@@ -157,8 +157,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         for price in &price_levels {
             // Adjust buy and sell prices with a small spread if needed
-            let spread = 0.001; // 0.1% spread
-            let half_spread = spread / 2.0; // 0.05%
+            let spread = 0.0001; // 0.01% spread
+            let half_spread = spread / 2.0; // 0.005%
 
             // Adjust sell price up by half the spread
             let sell_price = price * (1.0 + half_spread);
