@@ -3,12 +3,12 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::{abigen, CallParameters},
+    prelude::CallParameters,
     programs::calls::CallHandler,
     types::{AssetId, ContractId, Identity},
 };
 
-use spark_market_sdk::{AssetType, OrderType, SparkMarketContract};
+use spark_market_sdk::{OrderType, SparkMarketContract};
 
 use tokio::time::{sleep, Duration};
 
