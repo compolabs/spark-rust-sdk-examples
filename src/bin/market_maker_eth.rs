@@ -3,7 +3,6 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::CallParameters,
     types::{AssetId, Bits256, ContractId, Identity},
 };
 
@@ -48,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
     // Define the total value of orders to open
-    let total_order_value_usd = 20.0; // Total value in USD
+    let total_order_value_usd = 60.0; // Total value in USD
 
     // Start of single execution block
     {
