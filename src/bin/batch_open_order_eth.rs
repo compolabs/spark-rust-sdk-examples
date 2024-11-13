@@ -3,7 +3,7 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::CallParameters,
+    prelude::VariableOutputPolicy,
     programs::calls::CallHandler,
     types::{AssetId, ContractId, Identity},
 };
@@ -20,7 +20,6 @@ pub fn format_to_readable_value(value: u64, decimals: u32) -> f64 {
     value as f64 / 10u64.pow(decimals) as f64
 }
 
-// Might fail if you don't have enough testnet ETH
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
@@ -51,8 +50,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let usdc_id = AssetId::from_str(&usdc_id)?;
 
     // Amounts to be used
-    let eth_amount = format_value_with_decimals(1, 7);
-    let usdc_amount = format_value_with_decimals(50, 6);
+    let eth_amount = format_value_with_decimals(1, 6);
+    let usdc_amount = format_value_with_decimals(5, 6);
 
     // Get user's current balances in the contract
     let account = market.account(wallet_id.clone()).await?.value;
@@ -67,14 +66,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("ETH deposit");
         let eth_deposit_amount = eth_amount - liquid_base;
 
-        let deposit_eth_call_params = CallParameters::new(eth_deposit_amount, eth_id, 1_000_000);
         let deposit_eth_call = market
             .get_instance()
             .methods()
             .deposit()
-            .with_contract_ids(&[contract_id.into(), implementation_contract_id.into()])
-            .call_params(deposit_eth_call_params)
-            .unwrap();
+            .with_contract_ids(&[implementation_contract_id.into()])
+            .call_params(fuels::prelude::CallParameters::new(
+                eth_deposit_amount,
+                eth_id,
+                1_000_000,
+            ))?
+            .with_variable_output_policy(VariableOutputPolicy::Exactly(1));
 
         // Execute the deposit call
         let _deposit_eth_result = deposit_eth_call.call().await?;
@@ -87,14 +89,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("USDC deposit");
         let usdc_deposit_amount = usdc_amount - liquid_quote;
 
-        let deposit_usdc_call_params = CallParameters::new(usdc_deposit_amount, usdc_id, 1_000_000);
         let deposit_usdc_call = market
             .get_instance()
             .methods()
             .deposit()
-            .with_contract_ids(&[contract_id.into(), implementation_contract_id.into()])
-            .call_params(deposit_usdc_call_params)
-            .unwrap();
+            .with_contract_ids(&[implementation_contract_id.into()])
+            .call_params(fuels::prelude::CallParameters::new(
+                usdc_deposit_amount,
+                usdc_id,
+                1_000_000,
+            ))?
+            .with_variable_output_policy(VariableOutputPolicy::Exactly(1));
 
         // Execute the deposit call
         let _deposit_usdc_result = deposit_usdc_call.call().await?;
@@ -104,52 +109,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Now proceed to create the open order calls
-    let mut multi_call_handler: CallHandler<
-        WalletUnlocked,
-        Vec<fuels::programs::calls::ContractCall>,
-        (),
-    > = CallHandler::new_multi_call(main_wallet.clone());
+    let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
 
     // Creating Buy / Sell Limit Orders in a single transaction
     let protocol_fee = market.protocol_fee().await?.value;
     println!("protocol_fee: {:?}", protocol_fee);
-
-    let open_order_call_params = CallParameters::default().with_gas_forwarded(20_000_000); // Increased gas
+    let matcher_fee = market.matcher_fee().await?.value;
+    println!("matcher fee: {:?}", matcher_fee);
 
     let buy_order_type = OrderType::Buy;
-    let buy_order_amount = 100_000; // 0.0001 ETH
-    let buy_start_price = 3_000u64;
-    let sell_order_amount = 100_000;
-    let sell_start_price = 3_001u64;
+    let buy_order_amount = 1000000; // 0.001 ETH
+    let buy_start_price = 3_230u64;
+    let sell_order_amount = 1000000;
+    let sell_start_price = 3_231u64;
     let step = 1;
 
     for i in 0..1 {
-        let buy_open_price = (buy_start_price + i * step) * 1_000_000_000_u64;
-        let sell_open_price = (sell_start_price + i * step) * 1_000_000_000_u64;
+        let buy_open_price = (buy_start_price + step * i) * 1_000_000_000_u64;
+        let sell_open_price = (sell_start_price + step * i) * 1_000_000_000_u64;
 
         let buy_open_order_call = market
             .get_instance()
             .methods()
             .open_order(buy_order_amount, buy_order_type.clone(), buy_open_price)
-            .call_params(open_order_call_params.clone())
-            .unwrap();
+            .with_contract_ids(&[implementation_contract_id.into()])
+            .with_variable_output_policy(VariableOutputPolicy::Exactly(1));
 
         let sell_open_order_call = market
             .get_instance()
             .methods()
             .open_order(sell_order_amount, OrderType::Sell, sell_open_price)
-            .call_params(open_order_call_params.clone())
-            .unwrap();
+            .with_contract_ids(&[implementation_contract_id.into()])
+            .with_variable_output_policy(VariableOutputPolicy::Exactly(1));
 
         multi_call_handler = multi_call_handler.add_call(buy_open_order_call);
         multi_call_handler = multi_call_handler.add_call(sell_open_order_call);
     }
 
-    // Include contracts when submitting the multicall
+    // Execute the prepared multicall
     let multicall_tx_result = multi_call_handler.submit().await?;
     println!(
-        "Submitted open orders in a multicall transaction: 0x{:?}",
-        multicall_tx_result.tx_id().to_string()
+        "Submitted open orders in a multicall transaction: 0x{}",
+        multicall_tx_result.tx_id()
     );
 
     sleep(Duration::from_secs(5)).await;

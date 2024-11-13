@@ -43,6 +43,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let wallet_id: Identity = main_wallet.address().into();
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
+    let orders = market.user_orders(wallet_id).await?.value;
+    println!("Initial Number of Orders: {:?}", orders.len());
+
     // Asset IDs for TRMP and KMLA
     let trmp_id: String = env::var("TRMP_ID")?;
     let kmla_id: String = env::var("KMLA_ID")?;

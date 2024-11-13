@@ -5634,8 +5634,7 @@ dependencies = [
 [[package]]
 name = "spark-market-sdk"
 version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "805a5a1ed5626060410f9e05097af6641f01ceceb13603f6ac8f6db7d2f2a20b"
+source = "git+https://github.com/compolabs/orderbook-contract?branch=master#9ee54404b183872b416160141729ee927b79012d"
 dependencies = [
  "anyhow",
  "fuels",
@@ -5645,9 +5644,8 @@ dependencies = [
 
 [[package]]
 name = "spark-registry-sdk"
-version = "0.6.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0436a1723bc041197367b5aa581290691e47f8e1b80427d63d4440800c40679"
+version = "0.6.5"
+source = "git+https://github.com/compolabs/orderbook-contract?branch=master#9ee54404b183872b416160141729ee927b79012d"
 dependencies = [
  "anyhow",
  "fuels",

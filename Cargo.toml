@@ -11,8 +11,9 @@ fuels = { version = "0.66.9" }
 # fuel-core = "0.40.0"
 
 tokio = { version = "1.12", features = ["rt", "macros"] }
-spark-market-sdk = { version = "0.6.5" }
-spark-registry-sdk = { version = "0.6.4" }
+spark-market-sdk = { git = "https://github.com/compolabs/orderbook-contract", branch = "master", package = "spark-market-sdk" }
+spark-registry-sdk = { git = "https://github.com/compolabs/orderbook-contract", branch = "master", package = "spark-registry-sdk" }
+
 
 anyhow = "1.0.89"
 dotenv = "0.15.0"

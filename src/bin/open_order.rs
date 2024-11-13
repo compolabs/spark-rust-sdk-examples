@@ -48,10 +48,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Depositing Assets
     let eth_id = AssetId::from_str(&eth_id)?;
-    let eth_amount = format_value_with_decimals(1, 7);
+    let eth_amount = format_value_with_decimals(1, 6);
 
     let usdc_id = AssetId::from_str(&usdc_id)?;
-    let usdc_amount = format_value_with_decimals(50, 6);
+    let usdc_amount = format_value_with_decimals(5, 6);
 
     let eth_bal = main_wallet.get_asset_balance(&eth_id).await?;
     let usd_bal = main_wallet.get_asset_balance(&usdc_id).await?;
@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Buying 0.001 ETH
     let buy_amount = 1000000;
     let order_type: OrderType = OrderType::Buy;
-    let price: u64 = 3_001_000_000_000_u64;
+    let price: u64 = 3_201_000_000_000_u64;
 
     println!(
         "Opening Buy Order: {} ETH at {} ETH/USDC",
@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Selling 0.001 ETH for 3002 USDC
     let sell_amount: u64 = 1000000;
     let order_type = OrderType::Sell;
-    let price = 3_002_000_000_000_u64;
+    let price = 3_402_000_000_000_u64;
 
     println!(
         "Opening Sell Order: {} ETH at {} ETH/USDC",
