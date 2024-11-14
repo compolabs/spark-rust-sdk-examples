@@ -28,8 +28,8 @@ async fn main() -> Result<()> {
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
     // Paste your order IDs here
-    let buy_order_id_str = "0xdc19e2b2eff449d059415014b7d1ba12935f9658f835784aeac79630e81df11c"; // Replace with your buy order ID
-    let sell_order_id_str = "0x28ae155ebd33d887765b343c6fc5e128a6e22b262dba22eed9f45ac3d7f9afdf"; // Replace with your sell order ID
+    let buy_order_id_str = "0xa3c5a22381727adc67d125aa01e24065516ad0c662e1258e85f5efdc9d45b641"; // Replace with your buy order ID
+    let sell_order_id_str = "0x401809b4af32ed2ca5297efec1d67d8276265efbad264d80c4f2b63c1f4334db"; // Replace with your sell order ID
 
     // Convert order IDs to Bits256
     let buy_order_id = bits256_from_hex_str(buy_order_id_str)?;

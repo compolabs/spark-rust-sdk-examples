@@ -3,7 +3,7 @@ use std::{env, error::Error, str::FromStr};
 
 use fuels::{
     accounts::{provider::Provider, wallet::WalletUnlocked},
-    prelude::{CallHandler, CallParameters, VariableOutputPolicy},
+    prelude::{CallHandler, CallParameters},
     types::{AssetId, Bits256, ContractId, Identity},
 };
 
@@ -57,10 +57,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("\nStarting new iteration...");
 
         // Fetch the current ETH price from CoinGecko
-        let url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
-        let response = reqwest::get(url).await?.json::<serde_json::Value>().await?;
-        let current_price: f64 = response["ethereum"]["usd"].as_f64().unwrap();
-        println!("Current ETH price: ${:.2}", current_price);
+        let current_price: f64 = loop {
+            // Fetch the current ETH price from CoinGecko
+            let url =
+                "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
+            let response = reqwest::get(url).await?.json::<serde_json::Value>().await?;
+
+            if let Some(price) = response["ethereum"]["usd"].as_f64() {
+                println!("Current ETH price: ${:.2}", price);
+                break price;
+            } else {
+                println!("Failed to retrieve price. Retrying in 3 seconds...");
+                sleep(Duration::from_secs(5)).await;
+            }
+        };
 
         // Define the ±1.5% price range
         let lower_bound = current_price * 0.985; // 1 - 0.015
@@ -360,7 +370,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         // Wait 30 seconds before starting the next iteration
         println!("Waiting 30 seconds before the next iteration...");
-        sleep(Duration::from_secs(30)).await;
+        sleep(Duration::from_secs(10)).await;
     }
 
     Ok(())
