@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Wallet Address: {:?}", main_wallet.address().to_string());
 
     // Define the total value of orders to open
-    let total_order_value_usd = 100.0; // Total value in USD
+    let total_order_value_usd = 500.0; // Total value in USD
 
     // Start of single execution block
     loop {
@@ -373,5 +373,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
         sleep(Duration::from_secs(10)).await;
     }
 
-    Ok(())
+    // Ok(())
 }
