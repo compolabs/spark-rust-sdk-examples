@@ -58,8 +58,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     > = CallHandler::new_multi_call(main_wallet.clone());
 
     // Deposit Calls
-    let deposit_btc_call = market.deposit_call_handler(eth_amount, eth_id).await;
-    let deposit_usdc_call = market.deposit_call_handler(usdc_amount, usdc_id).await;
+    let deposit_btc_call = market.deposit_call_handler(eth_amount, eth_id);
+    let deposit_usdc_call = market.deposit_call_handler(usdc_amount, usdc_id);
 
     multi_call_handler = multi_call_handler.add_call(deposit_btc_call);
     multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
@@ -81,13 +81,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let buy_open_price = (buy_start_price + i * step) * 1_000_000_000_u64;
         let sell_open_price = (sell_start_price + i * step) * 1_000_000_000_u64;
 
-        let buy_open_order_call = market
-            .open_order_call_handler(buy_order_amount, buy_order_type.clone(), buy_open_price)
-            .await;
+        let buy_open_order_call = market.open_order_call_handler(
+            buy_order_amount,
+            buy_order_type.clone(),
+            buy_open_price,
+        );
 
-        let sell_open_order_call = market
-            .open_order_call_handler(sell_order_amount, OrderType::Sell, sell_open_price)
-            .await;
+        let sell_open_order_call =
+            market.open_order_call_handler(sell_order_amount, OrderType::Sell, sell_open_price);
 
         multi_call_handler = multi_call_handler.add_call(buy_open_order_call);
         multi_call_handler = multi_call_handler.add_call(sell_open_order_call);

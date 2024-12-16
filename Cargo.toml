@@ -7,11 +7,11 @@ license = "Apache-2.0"
 rust-version = "1.82"
 
 [dependencies]
-fuels = { version = "0.66.9" }
+fuels = { version = "0.66.10" }
 # fuel-core = "0.40.0"
 
 tokio = { version = "1.12", features = ["rt", "macros"] }
-spark-market-sdk = { version = "0.6.5" }
+spark-market-sdk = { version = "0.6.6" }
 spark-registry-sdk = { version = "0.6.4" }
 
 anyhow = "1.0.89"

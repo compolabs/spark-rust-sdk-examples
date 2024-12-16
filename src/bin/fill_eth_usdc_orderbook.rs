@@ -73,12 +73,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let mut multi_call_handler = CallHandler::new_multi_call(wallet.clone());
 
         if eth_needed > 0 {
-            let deposit_eth_call = market.deposit_call_handler(eth_needed, eth_id).await;
+            let deposit_eth_call = market.deposit_call_handler(eth_needed, eth_id);
             multi_call_handler = multi_call_handler.add_call(deposit_eth_call);
         }
 
         if usdc_needed > 0 {
-            let deposit_usdc_call = market.deposit_call_handler(usdc_needed, usdc_id).await;
+            let deposit_usdc_call = market.deposit_call_handler(usdc_needed, usdc_id);
             multi_call_handler = multi_call_handler.add_call(deposit_usdc_call);
         }
 
@@ -105,9 +105,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for i in 0..SELL_ORDER_ITERATIONS {
             let price = SELL_ORDER_START_PRICE + i * SELL_ORDER_STEP;
 
-            let sell_order_call = market
-                .open_order_call_handler(ETH_PER_ORDER, OrderType::Sell, price)
-                .await;
+            let sell_order_call =
+                market.open_order_call_handler(ETH_PER_ORDER, OrderType::Sell, price);
 
             order_multi_call_handler = order_multi_call_handler.add_call(sell_order_call);
             println!(
@@ -127,9 +126,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for i in 0..BUY_ORDER_ITERATIONS {
             let price = BUY_ORDER_START_PRICE - i * BUY_ORDER_STEP;
 
-            let buy_order_call = market
-                .open_order_call_handler(USDC_PER_ORDER, OrderType::Buy, price)
-                .await;
+            let buy_order_call =
+                market.open_order_call_handler(USDC_PER_ORDER, OrderType::Buy, price);
 
             order_multi_call_handler = order_multi_call_handler.add_call(buy_order_call);
             println!(
