@@ -3,6 +3,7 @@ use std::env;
 
 use fuels::{
     accounts::provider::Provider, accounts::wallet::WalletUnlocked, programs::calls::CallHandler,
+    crypto::SecretKey,
     types::ContractId, types::Identity,
 };
 use std::str::FromStr;
@@ -23,21 +24,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
     // Environment variables
-    let mnemonic = env::var("MNEMONIC")?;
-    let contract_id = env::var("TRMP_KMLA_CONTRACT_ID")?;
+    let private_key = env::var("PRIVATE_KEY")?;
+    let contract_id = env::var("FUEL_USDC_CONTRACT_ID")?;
+    let fuel_id = env::var("FUEL_ID")?;
+    let usdc_id = env::var("USDC_ID")?;
 
     // Connect to provider
-    let provider_url = env::var("PROVIDER")?;
+    let provider_url = "mainnet.fuel.network";
     let provider = Provider::connect(provider_url).await?;
 
-    let main_wallet =
-        WalletUnlocked::new_from_mnemonic_phrase(&mnemonic, Some(provider.clone())).unwrap();
-    let contract_id = ContractId::from_str(&contract_id)?;
-    let market = SparkMarketContract::new(contract_id.clone(), main_wallet.clone()).await;
+    let private_key = SecretKey::from_str(&private_key).unwrap();
+    let wallet = WalletUnlocked::new_from_private_key(private_key, Some(provider.clone()));
 
+    let contract_id = ContractId::from_str(&contract_id)?;
+    let market = SparkMarketContract::new(contract_id.clone(), wallet.clone()).await;
     // Fuel wallet address
-    let wallet_id: Identity = main_wallet.address().into();
-    println!("wallet {:?}", main_wallet.address().to_string());
+    let wallet_id: Identity = wallet.address().into();
+    println!("wallet {:?}", wallet.address().to_string());
 
     // Fetching user orders
     let orders = market.user_orders(wallet_id).await?.value;
@@ -50,7 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if total_orders > 0 {
         for (batch_index, batch_orders) in orders.chunks(BATCH_SIZE).enumerate() {
             // Prepare multi_call_handler for this batch
-            let mut multi_call_handler = CallHandler::new_multi_call(main_wallet.clone());
+            let mut multi_call_handler = CallHandler::new_multi_call(wallet.clone());
 
             for order_id in batch_orders {
                 let cancel_order_call = market.get_instance().methods().cancel_order(*order_id);
@@ -64,7 +67,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             );
 
             // Execute the prepared calls for this batch
-            let _cancel_order_multicall_tx = multi_call_handler.submit().await?;
+            let cancel_order_multicall_tx = multi_call_handler.submit().await?;
+            println!("Calnceling responce: {:?}", cancel_order_multicall_tx);
             println!("Batch {} cancelled successfully", batch_index + 1);
         }
     } else {
