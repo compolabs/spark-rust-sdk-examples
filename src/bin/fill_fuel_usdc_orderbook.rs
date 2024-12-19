@@ -11,33 +11,33 @@ use rand::Rng;
 
 use std::{env, error::Error, str::FromStr};
 
-const FUEL_PER_ORDER: u64 = 1_000_000; // 0.001 FUEL
+const FUEL_PER_ORDER: u64 = 1_000_000; 
 const SELL_ORDER_START_PRICE: u64 = 4400_000_000_000;
-const SELL_ORDER_ITERATIONS: u64 = 0; // 0 iterations for debugging
-const SELL_ORDER_STEP_PERCENT: f64 = 0.002; // 0.2%
+const SELL_ORDER_ITERATIONS: u64 = 0; 
+const SELL_ORDER_STEP_PERCENT: f64 = 0.002; 
 
-const USDC_PER_ORDER: u64 = 300_000; // 1 USDC
-const BUY_ORDER_START_PRICE: u64 = 20_000_000; // 0.02 USDC per 1 FUEL
+const USDC_PER_ORDER: u64 = 300_000; 
+const BUY_ORDER_START_PRICE: u64 = 20_000_000; 
 const BUY_ORDER_ITERATIONS: u64 = 10;
 const BUY_ORDER_STEP_PERCENT: f64 = 0.07;
 
 const SELL_ORDERS_COUNT: usize = SELL_ORDER_ITERATIONS as usize;
 const BUY_ORDERS_COUNT: usize = BUY_ORDER_ITERATIONS as usize;
 
-const VOLUME_VARIATION_PERCENT: f64 = 0.1; // 10%
+const VOLUME_VARIATION_PERCENT: f64 = 0.1; 
 
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
-    // Environment variables
+    
     let private_key = env::var("PRIVATE_KEY")?;
     let contract_id = env::var("FUEL_USDC_CONTRACT_ID")?;
     let fuel_id = env::var("FUEL_ID")?;
     let usdc_id = env::var("USDC_ID")?;
 
-    // Connect to provider
+    
     let provider_url = "mainnet.fuel.network";
     let provider = Provider::connect(provider_url).await?;
 
@@ -50,11 +50,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let fuel_id = AssetId::from_str(&fuel_id)?;
     let usdc_id = AssetId::from_str(&usdc_id)?;
 
-    // Calculate total amounts needed
+    
     let total_fuel_needed = FUEL_PER_ORDER * (SELL_ORDERS_COUNT as u64);
     let total_usdc_needed = USDC_PER_ORDER * (BUY_ORDERS_COUNT as u64);
 
-    // Check current balance and deposit only if needed
+    
     let balance = market.account(wallet.address().into()).await?.value;
 
     let fuel_balance = balance.liquid.base;
@@ -127,11 +127,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let price = (BUY_ORDER_START_PRICE as f64 * (1.0 - i as f64 * BUY_ORDER_STEP_PERCENT)) as u64;
             println!("price {:?}", price);
 
-            // Объём будет линейно возрастать с каждой итерацией
+            
             let adjusted_usdc_volume = USDC_PER_ORDER + (i as u64 * USDC_PER_ORDER / BUY_ORDER_ITERATIONS);
             println!("adjusted_usdc_volume {:?}", adjusted_usdc_volume);
 
-            // Рассчитываем объём FUEL, который можно купить за указанную сумму USDC по текущей цене
+            
             let adjusted_fuel_volume = (adjusted_usdc_volume as f64 * 1e9 / price as f64) as u64;
             let adjusted_fuel_volume_scaled = adjusted_fuel_volume * 1000;
             println!("adjusted_fuel_volume {:?}", adjusted_fuel_volume_scaled);
