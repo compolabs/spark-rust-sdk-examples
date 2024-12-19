@@ -47,9 +47,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("User Orders: {:?}", orders);
 
     // Cancel orders in batches of 50
-    const BATCH_SIZE: usize = 50;
+    //const BATCH_SIZE: usize = 5;
     let total_orders = orders.len();
 
+    for order in orders {
+        //let a = market.get_instance().methods().cancel_order(order);
+        let b = market.cancel_order(order).await;
+        println!("result: {:?}", b);
+    }
+    /*
     if total_orders > 0 {
         for (batch_index, batch_orders) in orders.chunks(BATCH_SIZE).enumerate() {
             // Prepare multi_call_handler for this batch
@@ -74,6 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else {
         println!("No orders to cancel");
     }
+    */
 
     Ok(())
 }
